@@ -34,12 +34,12 @@ result = ms.mqlread(query)
 A full list of the freebase apis is at the [http://www.freebase.com/view/freebase/metaweb_api_service metaweb_api_service page]. Most of them are supported here.
 
 == login ==
-`r = freebase.login(username=andrew, password=secret)`
+{{{r = freebase.login(username=andrew, password=secret)}}}
 == logout ==
-`r = freebase.logout()`
+{{{r = freebase.logout()}}}
 == loggedin ==
-`r = freebase.loggedin()`
+{{{r = freebase.loggedin()}}}
 Returns a boolean indicating whether or not a user is logged in or not.
-== user_info ==
-`r = freebase.user_info()`
+=== user_info ===
+{{{r = freebase.user_info()}}}
 Returns a typical dictionary response with information on the user.
