@@ -92,3 +92,15 @@ Given the guid of the _article_ of a topic, `raw` will return that blob of text 
 r = freebase.blurb(guid, break_paragraphs=False, maxlength=200)
 }}}
 Similar to `raw`, `blurb` needs the guid of the _article_ of a topic. The major difference is that `blurb` only returns text, no html. 
+
+== images ==
+{{{
+list_of_images = freebase.images(guid, limit=None)
+}}}
+`images` returns a list of all the images about a certain guid. It's really just a wrapper around the query:
+{{{
+{
+    "guid" : GUID,
+    "/common/topic/image" : [{"id" : null, "optional" : true, "limit" : LIMIT}[]
+}
+}}}
