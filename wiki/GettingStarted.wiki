@@ -72,4 +72,4 @@ r = freebase.version()
 Not usually needed, but it returns the current version of each of freebase's major systems.
 
 = Service APIs =
-Service APIs don't work any differently than the "normal" APIs. There are five categories: `trans`, `upload`, `search`, `geosearch`, and `touch`.
+Service APIs don't work any differently than the base APIs. There are five categories: `trans`, `upload`, `search`, `geosearch`, and `touch`.
