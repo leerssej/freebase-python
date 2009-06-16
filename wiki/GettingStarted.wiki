@@ -4,9 +4,9 @@ freebase-python provides an easy way to acces [http://www.freebase.com/ freebase
 
 {{{
 import freebase.api
-freebase.api.mqlread(
-    {"name" : "The Beatles",
+freebase.api.mqlread({
+    "name" : "The Beatles",
     "type" : "/music/artist",
-    "album" : []}
-)
+    "album" : []
+})
 }}}
