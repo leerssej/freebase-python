@@ -1,0 +1,10 @@
+freebase-python provides an easy way to acces [http://www.freebase.com/ freebase.com]'s API.
+
+= A Simple Example =
+
+{{{
+import freebase.api
+freebase.api.mqlread(
+{"name":"Sting",
+"*":None})
+}}}
