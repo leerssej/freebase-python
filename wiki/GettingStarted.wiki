@@ -74,3 +74,21 @@ Not usually needed, but it returns the current version of each of freebase's maj
 
 = Service APIs =
 Service APIs don't work any differently than the base APIs. There are five categories: `trans`, `upload`, `search`, `geosearch`, and `touch`.
+
+== trans raw ==
+{{{
+r = freebase.raw(guid)
+}}}
+Given the guid of the _article_ of a topic, `raw` will return that blob of text or html. In order to get the guid of the article, you should execute something like this: 
+{{{
+{
+    "id" : topicID,
+    "article" : [{ "id" : null, "optional" : true, "limit" : 1 }]
+}
+}}}
+
+== trans blurb ==
+{{{
+r = freebase.blurb(guid, break_paragraphs=False, maxlength=200)
+}}}
+Similar to `raw`, `blurb` needs the guid of the _article_ of a topic. The major difference is that `blurb` only returns text, no html. 
