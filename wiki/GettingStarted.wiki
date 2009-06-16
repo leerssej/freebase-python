@@ -77,9 +77,9 @@ Service APIs don't work any differently than the base APIs. There are five categ
 
 == trans raw ==
 {{{
-r = freebase.raw(guid)
+r = freebase.raw(id)
 }}}
-Given the guid of the _article_ of a topic, `raw` will return that blob of text or html. In order to get the guid of the article, you should execute something like this: 
+Given the id of the _article_ of a topic, `raw` will return that blob of text or html. In order to get the guid of the article, you should execute something like this: 
 {{{
 {
     "id" : topicID,
@@ -89,18 +89,6 @@ Given the guid of the _article_ of a topic, `raw` will return that blob of text 
 
 == trans blurb ==
 {{{
-r = freebase.blurb(guid, break_paragraphs=False, maxlength=200)
+r = freebase.blurb(id, break_paragraphs=False, maxlength=200)
 }}}
-Similar to `raw`, `blurb` needs the guid of the _article_ of a topic. The major difference is that `blurb` only returns text, no html. 
-
-== images ==
-{{{
-list_of_images = freebase.images(guid, limit=None)
-}}}
-`images` returns a list of URLs pertaining to the images for a certain guid. It's just a little bit more complicated than the query:
-{{{
-{
-    "guid" : GUID,
-    "/common/topic/image" : [{"id" : null, "optional" : true, "limit" : LIMIT}[]
-}
-}}}
+The major difference between `blurb` and `raw` is that `blurb` only returns text (no html) and can only be done on certain objects (topics, articles, etc), while `raw` can return anything, but can't be called on topics.
