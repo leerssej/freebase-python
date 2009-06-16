@@ -23,7 +23,7 @@ import freebase.sandbox
 result = freebase.sandbox.mqlread(query)
 }}}
 
-For simplicity, you can call the class freebase and perform your operation. It is also possible to create *HTTPMetawebSession*s:
+For simplicity, you can call the class freebase and perform your operation. It is also possible to create *HTTPMetawebSession* s:
 {{{
 from freebase import HTTPMetawebSession
 ms = HTTPMetawebSession('freebase.com')
@@ -32,6 +32,9 @@ result = ms.mqlread(query)
 
 = Useful APIs =
 A full list of the freebase apis is at the [http://www.freebase.com/view/freebase/metaweb_api_service metaweb_api_service page]. Most of them are supported here.
- * r = freebase.login(username=andrew, password=secret)
- * r = freebase.logout()
- * r = freebase.loggedin()
+ * `r = freebase.login(username=andrew, password=secret)`
+ * `r = freebase.logout()`
+ * `r = freebase.loggedin()`
+Returns a boolean indicating whether or not a user is logged in or not.
+ * `r = freebase.user_info()`
+Returns a typical dictionary response with information on the user.
