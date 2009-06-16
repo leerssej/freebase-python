@@ -11,14 +11,27 @@ query = {
 }}}
 
 = A Simple Example =
-Let's just make a simple read query for freebase.
+Let's just make a simple read query for freebase:
 {{{
 import freebase
 result = freebase.mqlread(query)
 }}}
 
-We could do the same for sandbox.freebase.com.
+We could do the same for sandbox.freebase:
 {{{
-import sandbox
-result = sandbox.mqlread(query)
+import freebase.sandbox
+result = freebase.sandbox.mqlread(query)
 }}}
+
+For simplicity, you can call the class freebase and perform your operation. It is also possible to create *HTTPMetawebSession*s:
+{{{
+from freebase import HTTPMetawebSession
+ms = HTTPMetawebSession('freebase.com')
+result = ms.mqlread(query)
+}}}
+
+= Useful APIs =
+A full list of the freebase apis is at the [http://www.freebase.com/view/freebase/metaweb_api_service metaweb_api_service page]. Most of them are supported here.
+ * r = freebase.login(username=andrew, password=secret)
+ * r = freebase.logout()
+ * r = freebase.loggedin()
