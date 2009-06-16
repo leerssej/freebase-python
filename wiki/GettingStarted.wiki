@@ -97,7 +97,7 @@ Similar to `raw`, `blurb` needs the guid of the _article_ of a topic. The major 
 {{{
 list_of_images = freebase.images(guid, limit=None)
 }}}
-`images` returns a list of all the images about a certain guid. It's really just a wrapper around the query:
+`images` returns a list of URLs pertaining to the images for a certain guid. It's just a little bit more complicated than the query:
 {{{
 {
     "guid" : GUID,
