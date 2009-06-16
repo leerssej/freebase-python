@@ -39,7 +39,7 @@ A full list of the freebase apis is at the [http://www.freebase.com/view/freebas
 {{{
 r = freebase.mqlread(query)
 }}}
-The query must be written in MQL. For more information on MQL, refer to the [http://mql.freebaseapps.com/ MQL and Freebase API reference guide]. You can also test your queries on the [http://www.freebase.com/app/queryeditor/ Query Editor], which can provide additional information on the query if you're stuck.
+`mqlread` is used to read information from freebase. The query must be written in MQL. For more information on MQL, refer to the [http://mql.freebaseapps.com/ MQL and Freebase API reference guide]. You can also test your queries on the [http://www.freebase.com/app/queryeditor/ Query Editor], which can provide additional information on the query if you're stuck.
 
 === mqlwrite ===
 {{{
