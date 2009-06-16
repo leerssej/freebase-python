@@ -55,7 +55,7 @@ freebase.logout()
 }}}
 === loggedin ===
 {{{
-in = freebase.loggedin()
+amiloggedin = freebase.loggedin()
 }}}
 Returns a boolean indicating whether or not a user is logged in or not.
 === user_info ===
