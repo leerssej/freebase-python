@@ -1,22 +1,24 @@
 freebase-python provides an easy way to acces [http://www.freebase.com/ freebase.com]'s API.
 
+We'll be using one example query to demonstrate aspects of freebase-python.
+
+{{{
+query = {
+    "name" : "The Beatles",
+    "type" : "/music/artist",
+    "album" : []
+}
+}}}
+
 = A Simple Example =
 Let's just make a simple read query for freebase.
 {{{
 import freebase
-r = freebase.mqlread({
-    "name" : "The Beatles",
-    "type" : "/music/artist",
-    "album" : []
-})
+result = freebase.mqlread(query)
 }}}
 
 We could do the same for sandbox.freebase.com.
 {{{
 import sandbox
-r = sandbox.mqlread({
-    "name" : "The Beatles",
-    "type" : "/music/artist",
-    "album" : []
-})
+result = sandbox.mqlread(query)
 }}}
