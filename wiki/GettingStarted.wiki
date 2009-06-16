@@ -23,14 +23,16 @@ import freebase.sandbox
 result = freebase.sandbox.mqlread(query)
 }}}
 
-For simplicity, you can call the class freebase and perform your operation. It is also possible to create *HTTPMetawebSession*s:
+For simplicity, you can call the class freebase and perform your operation. If you want to manage different connections with different settings, it is also possible to create HTTPMetawebSessions:
 {{{
 from freebase import HTTPMetawebSession
-ms = HTTPMetawebSession("freebase.com")
-result = ms.mqlread(query)
+fms = HTTPMetawebSession("freebase.com")
+sms = HTTPMetawebSession("sandbox.freebase.com")
+result = fms.mqlread(query)
 }}}
+This would be useful if you wanted to be able to easily switch between using sandbox.freebase.com and freebase.com or if you wanted to create many sessions to execute in parallel.
 
-= Useful APIs =
+= Base APIs =
 A full list of the freebase apis is at the [http://www.freebase.com/view/freebase/metaweb_api_service metaweb_api_service page]. Most of them are supported here.
 
 === mqlread ===
@@ -68,3 +70,6 @@ Returns a typical dictionary response with information on the user.
 r = freebase.version()
 }}}
 Not usually needed, but it returns the current version of each of freebase's major systems.
+
+= Service APIs =
+Service APIs don't work any differently than the "normal" APIs. There are five categories: `trans`, `upload`, `search`, `geosearch`, and `touch`.
