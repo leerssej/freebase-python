@@ -91,7 +91,7 @@ Given the id of the _article_ of a topic, `raw` will return that blob of text or
 {{{
 r = freebase.blurb(id, break_paragraphs=False, maxlength=200)
 }}}
-The major difference between `blurb` and `raw` is that `blurb` only returns text (no html) and can only be done on certain objects (topics, articles, etc), while `raw` can return anything, but can't be called on topics.
+The major difference between `blurb` and `raw` is that `blurb` only returns text (no html) and can only be done on certain objects (topics, articles, etc), while `raw` can return anything, but can't be called on topics. `maxlength` is the number of characters that should be displayed and must be larger than the sum of the number of characters in the first word plus 3 (for '...').
 
 == image_thumb ==
 {{{
