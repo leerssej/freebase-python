@@ -98,3 +98,9 @@ The major difference between `blurb` and `raw` is that `blurb` only returns text
 r = freebase.image_thumb(id, maxwidth=None, maxheight=None, mode="fit", onfail=None)
 }}}
 `image_thumb` returns an image scaled around according to the arguments passed to it. The exact way the arguments are detailed is located [http://www.freebase.com/view/en/api_trans_image_thumb here].
+
+== upload ==
+{{{
+r = freebase.upload(body, content_type, document_id=False, permission_of=False)
+}}}
+`upload` uploads your string `body` to freebase. The response tells you whether or not the upload was successful and the new id of the blob you uploaded. You can connect your newly uploaded blob to a document by using the document_id property.
