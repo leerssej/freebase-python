@@ -75,7 +75,7 @@ Not usually needed, but it returns the current version of each of freebase's maj
 = Service APIs =
 Service APIs don't work any differently than the base APIs. There are five categories: `trans`, `upload`, `search`, `geosearch`, and `touch`.
 
-== trans raw ==
+=== trans raw ===
 {{{
 r = freebase.raw(id)
 }}}
@@ -87,19 +87,19 @@ Given the id of the _article_ of a topic, `raw` will return that blob of text or
 }
 }}}
 
-== trans blurb ==
+=== trans blurb ===
 {{{
 r = freebase.blurb(id, break_paragraphs=False, maxlength=200)
 }}}
 The major difference between `blurb` and `raw` is that `blurb` only returns text (no html) and can only be done on certain objects (topics, articles, etc), while `raw` can return anything, but can't be called on topics. `maxlength` is the number of characters that should be displayed and must be larger than the sum of the number of characters in the first word plus 3 (for '...').
 
-== image_thumb ==
+=== image_thumb ===
 {{{
 r = freebase.image_thumb(id, maxwidth=None, maxheight=None, mode="fit", onfail=None)
 }}}
 `image_thumb` returns an image scaled around according to the arguments passed to it. The exact way the arguments are detailed is located [http://www.freebase.com/view/en/api_trans_image_thumb here].
 
-== upload ==
+=== upload ===
 {{{
 r = freebase.upload(body, content_type, document_id=False, permission_of=False)
 }}}
