@@ -104,3 +104,9 @@ r = freebase.image_thumb(id, maxwidth=None, maxheight=None, mode="fit", onfail=N
 r = freebase.upload(body, content_type, document_id=False, permission_of=False)
 }}}
 `upload` uploads your string `body` to freebase. The response tells you whether or not the upload was successful and the new id of the blob you uploaded. You can connect your newly uploaded blob to a document by using the document_id property.
+
+=== uri_submit ===
+{{{
+r = freebase.uri_submit(URI, document_id=None, content_type=None)
+}}}
+Similar to `upload`, `uri_submit` takes the URI of the information you want to upload to freebase and uploads it. You can upload any type of document and can attach it to a real document with the use of the document_id property.
