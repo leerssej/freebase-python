@@ -2,7 +2,7 @@
 
 = Introduction =
 
-Adding 3rd party libraries to Google AppEngine can be tricky, but don't worry, adding support for python is a breeze!
+Adding 3rd party libraries to Google AppEngine can be tricky, but don't worry, adding support for freebase-python is a breeze!
 
 
 = Details =
