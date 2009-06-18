@@ -1,4 +1,6 @@
+#summary How do you start using Freebase's python api?
 #labels Featured
+
 freebase-python provides an easy way to acces [http://www.freebase.com/ freebase.com]'s API.
 
 We'll be using one example query to demonstrate aspects of freebase-python.
