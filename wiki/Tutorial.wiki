@@ -1,4 +1,5 @@
 #summary You just picked up freebase-python. Now what?
+#labels Featured
 
 = freebase-python: The Basics =
 
@@ -52,10 +53,3 @@ for album in results.album:
 }}}
 
 As you can see, this is really just the basic example with a more complicated query. For more information on forming queries, see the [http://mql.freebaseapps.com/ MQL Reference Guide]. In this case, we're looking the The Beatles and getting all their albums. With each album, we get its `name`, `release_date`, and `track`. But with `track`, we don't list the available tracks, instead we count the number of tracks present. We also sort the albums that are returned by their `release_date`. 
-
-= Details =
-
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
