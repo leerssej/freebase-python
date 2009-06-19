@@ -19,3 +19,25 @@ If you want a working example, check out [http://freebase-images.appspot.com Fre
 
 = Walkthrough =
 [http://freebase-python.googlecode.com/svn/trunk/examples/freebase-images-appengine/README The README] contains a simple description of the working parts of the freebase-images application.
+
+== Freebase Suggest ==
+One neat thing you might notice if you visit the example is that you can start typing a topic, and suggestions will automatically pop up. This functionality is provided by the [http://code.google.com/p/freebase-suggest/ Freebase suggest project]. It's really easy to include in your project. Once you download the zip and run `make` in the directory, you'll have a freebase.suggest.js as well as a css/ folder in a newly made dist/ folder. Put all of these in your project.
+
+Freebase suggest uses [http://jquery.com jQuery] so you'll have to include that too. Once you have jQuery, freebase.suggest.js, and the css files associated, all you have to do is tell jQuery what element you want to have suggest properties:
+{{{
+<script type="text/javascript">
+  $(document).ready(function() {
+    $("#id_of_element").freebaseSuggest();
+  });
+</script>
+}}}
+Naturally, there are many options you can pass freebaseSuggest(), all of which are detailed [http://code.google.com/p/freebase-suggest/wiki/Usage here].
+
+In the example application, the actual code was:
+{{{
+$("#q").freebaseSuggest().bind("fb-select", function(e, data) {
+				id = data.id;
+				window.location.hash = "#" + data.id;
+				insert_images(data.id);	
+			});
+}}}
