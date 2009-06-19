@@ -16,3 +16,6 @@ This will only install the actual code that runs the library, not all the egg bu
 And that's it. No need to `easy_install` or `setup.py`, just {{{import freebase}}} in your project and you're set.
 
 If you want a working example, check out [http://freebase-images.appspot.com Freebase Images]. Its code is [http://code.google.com/p/freebase-python/source/browse/#svn/trunk/examples/freebase-images-appengine in the repository].
+
+= Walkthrough =
+[http://freebase-python.googlecode.com/svn/trunk/examples/freebase-images-appengine/README The README] contains a simple description of the working parts of the freebase-images application.
