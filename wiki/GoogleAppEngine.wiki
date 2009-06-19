@@ -2,7 +2,7 @@
 
 = Introduction =
 
-Adding 3rd party libraries to Google AppEngine can be tricky, but don't worry, adding support for freebase-python is a breeze!
+Adding 3rd party libraries to Google AppEngine can be tricky, but don't worry, adding support for freebase-python is a breeze! For a working example of an application on AppEngine, you can see the application at [http://freebase-images.appspot.com] and the code at [http://code.google.com/p/freebase-python/source/browse/#svn/trunk/examples/freebase-images-appengine]
 
 
 = Details =
