@@ -1,4 +1,5 @@
 #summary A brief summary of differences between freebase-api and metaweb-py.
+#labels Deprecated
 
 = Introduction =
 
