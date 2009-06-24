@@ -140,6 +140,7 @@ You can actually do `raw` on any document content: an article, image, pdf, etc. 
 >>> query = {
         "id" : "/en/the_beatles",
         "/common/article/image" : [{"id" : None, "optional" : True, "limit" : 1}]
+    }
 >>> r = freebase.mqlread(query)
 >>> image_id = r["/common/article/image"][0]["id"]
 >>> im = freebase.raw(image_id) # Now you have the actual image.
