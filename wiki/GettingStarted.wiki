@@ -34,7 +34,7 @@ For simplicity, you can call the class freebase and perform your operation. If y
 >>> fms = HTTPMetawebSession("freebase.com")
 >>> sms = HTTPMetawebSession("sandbox.freebase.com")
 >>> result = fms.mqlread(query)
->>> fms is not sms:
+>>> fms is not sms
 True
 }}}
 This would be useful if you wanted to be able to easily switch between using sandbox.freebase.com and freebase.com or if you wanted to create many sessions to execute in parallel.
@@ -118,17 +118,32 @@ Hopefully there won't be a problem, but just in case you want to check, this is 
 = Service APIs =
 Service APIs don't work any differently than the base APIs. There are five categories: `trans`, `upload`, `search`, `geosearch`, and `touch`.
 
-=== trans raw ===
+=== [http://www.freebase.com/view/en/api_trans_raw trans raw] ===
 {{{
-r = freebase.raw(id)
+>>> r = freebase.raw(id)
 }}}
-Given the id of the _article_ of a topic, `raw` will return that blob of text or html. In order to get the guid of the article, you should execute something like this: 
+Given the id of a document, `raw` will return that blob exactly as it is. Note you cannot ask for the raw of a topic because it is not a document. First, you have to isolate what document you want and then you can get its content.
 {{{
-{
-    "id" : topicID,
-    "article" : [{ "id" : null, "optional" : true, "limit" : 1 }]
-}
+>>> query = {
+        "id" : "/en/the_beatles",
+        "/common/topic/article" : [{"id" : None, "optional" : True, "limit" : 1}]
+    }
+>>> r = freebase.mqlread(query)
+>>> article_id = r["/common/topic/article"][0]["id"]
+>>> print freebase.raw(article_id)
+The Beatles were a rock and pop band from Liverpool, England that formed in 1960...
 }}}
+
+You can actually do `raw` on any document content: an article, image, pdf, etc. For an image, you would do something like this:
+{{{
+>>> query = {
+        "id" : "/en/the_beatles",
+        "/common/article/image" : [{"id" : None, "optional" : True, "limit" : 1}]
+>>> r = freebase.mqlread(query)
+>>> image_id = r["/common/article/image"][0]["id"]
+>>> im = freebase.raw(image_id) # Now you have the actual image.
+}}}
+The image's URL would be http://www.freebase.com/api/trans/raw/{image_id}.
 
 === trans blurb ===
 {{{
