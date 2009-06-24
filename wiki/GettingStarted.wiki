@@ -16,31 +16,31 @@ query = {
 = A Simple Example =
 Let's just make a simple read query for freebase:
 {{{
-import freebase
-result = freebase.mqlread(query)
+>>> import freebase
+>>> result = freebase.mqlread(query)
 }}}
 
 We could do the same for sandbox.freebase:
 {{{
-import freebase.sandbox
-result = freebase.sandbox.mqlread(query)
+>>> import freebase.sandbox
+>>> result = freebase.sandbox.mqlread(query)
 }}}
 
 For simplicity, you can call the class freebase and perform your operation. If you want to manage different connections with different settings, it is also possible to create HTTPMetawebSessions:
 {{{
-from freebase import HTTPMetawebSession
-fms = HTTPMetawebSession("freebase.com")
-sms = HTTPMetawebSession("sandbox.freebase.com")
-result = fms.mqlread(query)
+>>> from freebase import HTTPMetawebSession
+>>> fms = HTTPMetawebSession("freebase.com")
+>>> sms = HTTPMetawebSession("sandbox.freebase.com")
+>>> result = fms.mqlread(query)
 }}}
 This would be useful if you wanted to be able to easily switch between using sandbox.freebase.com and freebase.com or if you wanted to create many sessions to execute in parallel.
 
 = Base APIs =
 A full list of the freebase apis is at the [http://www.freebase.com/view/freebase/metaweb_api_service metaweb_api_service page]. Most of them are supported here.
 
-=== mqlread ===
+=== [http://www.freebase.com/view/en/api_service_mqlread mqlread] ===
 {{{
-r = freebase.mqlread(query, asof=None)
+>>> r = freebase.mqlread(query, asof=None)
 }}}
 `mqlread` is used to read information from freebase. The query must be written in MQL. For more information on MQL, refer to the [http://mql.freebaseapps.com/ MQL and Freebase API reference guide]. You can also test your queries on the [http://www.freebase.com/app/queryeditor/ Query Editor], which can provide additional information on the query if you're stuck.
 
