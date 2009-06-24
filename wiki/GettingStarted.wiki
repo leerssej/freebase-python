@@ -69,12 +69,27 @@ Returns a boolean indicating whether or not a user is logged in or not.
 === user_info ===
 {{{
 print freebase.user_info()
-"{'status': '200 OK', 'username': 'nitromaster101', 'code': '/api/status/ok', 'name': 'Andrew Rodriguez', 'guid': '#9202a8c04000641f80000000095397d1', 'id': '/user/nitromaster101', 'transaction_id': 'cache;cache03.p01.sjc1:8101;2009-06-24T19:48:27Z;0031'}"
+{ 'status': '200 OK',
+  'username': 'nitromaster101',
+  'code': '/api/status/ok',
+  'name': 'Andrew Rodriguez', 
+  'guid': '#9202a8c04000641f80000000095397d1', 
+  'id': '/user/nitromaster101', 
+  'transaction_id': 'cache;...' }
 }}}
 Returns a typical dictionary response with information on the user.
 === version ===
 {{{
-r = freebase.version()
+print freebase.version()
+{ 'me': 'me/dev/135/pyroot:76103', 
+  'index': 'relevance/dev/27:74629', 
+  'code': '/api/status/ok', 
+  'cdb': 'cdb/dev/18:72726', 
+  'graph': 'gd/dev/50:76020', 
+  'server': 'www.freebase.com', 
+  'client': 'client/dev/93:76143', 
+  'status': '200 OK', 
+  'transaction_id': 'cache;...'}
 }}}
 Not usually needed, but it returns the current version of each of freebase's major systems.
 
