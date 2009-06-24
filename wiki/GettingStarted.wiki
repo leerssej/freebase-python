@@ -18,6 +18,8 @@ Let's just make a simple read query for freebase:
 {{{
 >>> import freebase
 >>> result = freebase.mqlread(query)
+>>> print result["album"]
+[u'Please Please Me', u'From Me to You', u'Introducing... The Beatles', u'She Lo...
 }}}
 
 We could do the same for sandbox.freebase:
@@ -32,10 +34,12 @@ For simplicity, you can call the class freebase and perform your operation. If y
 >>> fms = HTTPMetawebSession("freebase.com")
 >>> sms = HTTPMetawebSession("sandbox.freebase.com")
 >>> result = fms.mqlread(query)
+>>> fms is not sms:
+True
 }}}
 This would be useful if you wanted to be able to easily switch between using sandbox.freebase.com and freebase.com or if you wanted to create many sessions to execute in parallel.
 
-= Base APIs =
+= The API =
 A full list of the freebase apis is at the [http://www.freebase.com/view/freebase/metaweb_api_service metaweb_api_service page]. Most of them are supported here.
 
 === [http://www.freebase.com/view/en/api_service_mqlread mqlread] ===
@@ -44,31 +48,24 @@ A full list of the freebase apis is at the [http://www.freebase.com/view/freebas
 }}}
 `mqlread` is used to read information from freebase. The query must be written in MQL. For more information on MQL, refer to the [http://mql.freebaseapps.com/ MQL and Freebase API reference guide]. You can also test your queries on the [http://www.freebase.com/app/queryeditor/ Query Editor], which can provide additional information on the query if you're stuck.
 
-=== mqlwrite ===
+=== [http://www.freebase.com/view/en/api_service_mqlwrite mqlwrite] ===
 {{{
-r = freebase.mqlwrite(query)
+>>> r = freebase.mqlwrite(query)
 }}}
 `mqlread`'s sister, `mqlwrite` writes to freebase. It's especially important to consult the [http://mql.freebaseapps.com/ reference guide], because writes are even more complicated than reads.
 
-=== login ===
+=== [http://www.freebase.com/view/en/api_account_login login] ===
 {{{
-freebase.login(username=andrew, password=secret)
+>>> freebase.login(username=andrew, password=secret)
 }}}
-=== logout ===
+=== [http://www.freebase.com/view/en/api_account_logout logout] ===
 {{{
-freebase.logout()
+>>> freebase.logout()
 }}}
-=== loggedin ===
+=== [http://www.freebase.com/view/guid/9202a8c04000641f800000000c36a842 user_info] ===
 {{{
-amiloggedin = freebase.loggedin()
-if amiloggedin:
-    print freebase.user_info()
-else: print "User not logged in."
-}}}
-Returns a boolean indicating whether or not a user is logged in or not.
-=== user_info ===
-{{{
-print freebase.user_info()
+>>> freebase.login(username, password)
+>>> print freebase.user_info()
 { 'status': '200 OK',
   'username': 'nitromaster101',
   'code': '/api/status/ok',
@@ -76,22 +73,47 @@ print freebase.user_info()
   'guid': '#9202a8c04000641f80000000095397d1', 
   'id': '/user/nitromaster101', 
   'transaction_id': 'cache;...' }
+>>> freebase.logout()
+>>> print freebase.user_info()
+Traceback (most recent call last):
+...
+MetawebError: request failed ...
 }}}
 Returns a typical dictionary response with information on the user.
-=== version ===
+=== [http://www.freebase.com/view/en/api_account_loggedin loggedin] ===
 {{{
-print freebase.version()
-{ 'me': 'me/dev/135/pyroot:76103', 
-  'index': 'relevance/dev/27:74629', 
-  'code': '/api/status/ok', 
-  'cdb': 'cdb/dev/18:72726', 
-  'graph': 'gd/dev/50:76020', 
-  'server': 'www.freebase.com', 
-  'client': 'client/dev/93:76143', 
-  'status': '200 OK', 
-  'transaction_id': 'cache;...'}
+>>> freebase.logout()
+>>> amiloggedin = freebase.loggedin()
+>>> if amiloggedin:
+        print freebase.user_info()
+>>> else: print "User not logged in."
+User not logged in.
+}}}
+Returns a boolean indicating whether or not a user is logged in or not.
+=== [http://www.freebase.com/view/en/api_version version] ===
+{{{
+>>> print freebase.version()
+{ u'me': u'me/dev/135/pyroot:76103', 
+  u'index': u'relevance/dev/27:74629', 
+  u'code': u'/api/status/ok', 
+  u'cdb': u'cdb/dev/18:72726', 
+  u'graph': u'gd/dev/50:76020', 
+  u'server': u'www.freebase.com', 
+  u'client': u'client/dev/93:76143', 
+  u'status': u'200 OK', 
+  u'transaction_id': u'cache;...' }
 }}}
 Not usually needed, but it returns the current version of each of freebase's major systems.
+=== [http://www.freebase.com/view/en/api_status status] ===
+{{{
+>>> print freebase.status()
+{ u'status': u'200 OK',
+  u'code': u'/api/status/ok',
+  u'graph': u'OK',
+  u'blob': u'OK', 
+  u'relevance': u'OK',
+  u'transaction_id': u'cache;...' }
+Hopefully there won't be a problem, but just in case you want to check, this is the current status of the freebase systems.
 
 = Service APIs =
 Service APIs don't work any differently than the base APIs. There are five categories: `trans`, `upload`, `search`, `geosearch`, and `touch`.
