@@ -61,11 +61,15 @@ freebase.logout()
 === loggedin ===
 {{{
 amiloggedin = freebase.loggedin()
+if amiloggedin:
+    print freebase.user_info()
+else: print "User not logged in."
 }}}
 Returns a boolean indicating whether or not a user is logged in or not.
 === user_info ===
 {{{
-r = freebase.user_info()
+print freebase.user_info()
+"{'status': '200 OK', 'username': 'nitromaster101', 'code': '/api/status/ok', 'name': 'Andrew Rodriguez', 'guid': '#9202a8c04000641f80000000095397d1', 'id': '/user/nitromaster101', 'transaction_id': 'cache;cache03.p01.sjc1:8101;2009-06-24T19:48:27Z;0031'}"
 }}}
 Returns a typical dictionary response with information on the user.
 === version ===
