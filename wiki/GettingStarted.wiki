@@ -127,31 +127,41 @@ Given the id of a document, `raw` will return that blob exactly as it is. Note t
 {{{
 >>> query = {
         "id" : "/en/the_beatles",
-        "/common/topic/article" : [{"id" : None, "optional" : True, "limit" : 1}]
+        "/common/topic/article" : {"id" : None, "optional" : True, "limit" : 1}
     }
 >>> r = freebase.mqlread(query)
->>> article_id = r["/common/topic/article"][0]["id"]
->>> print freebase.raw(article_id)
-The Beatles were a rock and pop band from Liverpool, England that formed in 1960...
+>>> article_id = r["/common/topic/article"]["id"]
+>>> freebase.raw(article_id)
+"The Beatles were a rock and pop band from Liverpool, England that formed in 1960...
 }}}
 
 You can actually do `raw` on any document content: an article, image, pdf, etc. For an image, you would do something like this:
 {{{
 >>> query = {
         "id" : "/en/the_beatles",
-        "/common/article/image" : [{"id" : None, "optional" : True, "limit" : 1}]
+        "/common/topic/image" : {"id" : None, "optional" : True, "limit" : 1}
     }
 >>> r = freebase.mqlread(query)
->>> image_id = r["/common/article/image"][0]["id"]
+>>> image_id = r["/common/topic/image"]["id"]
 >>> im = freebase.raw(image_id) # Now you have the actual image.
 }}}
-The image's URL would be http://www.freebase.com/api/trans/raw/{image_id}.
+The image's URL would be `www.freebase.com/api/trans/raw/{image_id}`.
 
-=== trans blurb ===
+=== [http://www.freebase.com/view/en/api_trans_blurb trans blurb] ===
 {{{
 r = freebase.blurb(id, break_paragraphs=False, maxlength=200)
 }}}
-The major difference between `blurb` and `raw` is that `blurb` only returns text (no html) and can only be done on certain objects (topics, articles, etc), while `raw` can return anything, but can't be called on topics. `maxlength` is the number of characters that should be displayed and must be larger than the sum of the number of characters in the first word plus 3 (for '...').
+The major difference between `blurb` and `raw` is that `blurb` only returns text (no html) and can only be done on certain objects (articles, other pieces of text), while `raw` can return anything, but can't be called on topics. `maxlength` is the number of characters that should be displayed and must be larger than the sum of the number of characters in the first word plus 3 (for '...').
+{{{
+>>> query = {
+        "id" : "/en/the_beatles",
+        "/common/topic/article" : {"id" : None, "optional" : True, "limit" : 1}
+    }
+>>> r = freebase.mqlread(query)
+>>> article_id = r["/common/topic/article"]["id"]
+>>> freebase.blurb(article_id, maxlength=53)
+"The Beatles were a rock and pop band from..."
+}}}
 
 === image_thumb ===
 {{{
