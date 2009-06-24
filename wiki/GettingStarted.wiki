@@ -164,18 +164,47 @@ The major difference between `blurb` and `raw` is that `blurb` only returns text
 
 === [http://www.freebase.com/view/en/api_trans_image_thumb image_thumb] ===
 {{{
-r = freebase.image_thumb(id, maxwidth=None, maxheight=None, mode="fit", onfail=None)
+>>> r = freebase.image_thumb(id, maxwidth=None, maxheight=None, mode="fit", onfail=None)
 }}}
 `image_thumb` returns an image scaled around according to the arguments passed to it. The exact way the arguments are detailed is located [http://www.freebase.com/view/en/api_trans_image_thumb here].
 
 === [http://www.freebase.com/view/en/api_service_upload upload] ===
 {{{
-r = freebase.upload(body, content_type, document_id=False, permission_of=False)
+>>> r = freebase.sandbox.upload(body, content_type, document_id=False, permission_of=False)
 }}}
 `upload` uploads your string `body` to freebase. The response tells you whether or not the upload was successful and the new id of the blob you uploaded. You can connect your newly uploaded blob to a document by using the document_id property.
+{{{
+>>> freebase.sandbox.login(username="andrew", password="secret")
+>>> r = freebase.sandbox.upload("Hi there!", "text/plain")
+>>> r
+{ u'/type/content/blob_id': u'ecde6d347ff4818974d71a23f3755d22bc8bb4d5a4b25f7aee396db1187cb9fd', 
+  u'/type/content/language': u'/lang/en', 
+  u'/type/content/text_encoding': u'utf-8', 
+  u'/type/content/length': 9, 
+  u'/type/content/media_type': u'text/plain', 
+  u'type': u'/type/content', 
+  u'id': u'/guid/9202a8c04000641f800000000c6f0055' }
+>>> freebase.sandbox.raw(r["id"])
+"Hi there!"
 
+}}}
 === [http://www.freebase.com/view/en/api_service_uri_submit uri_submit] ===
 {{{
-r = freebase.uri_submit(URI, document_id=None, content_type=None)
+>>> r = freebase.uri_submit(URI, document_id=None, content_type=None)
+>>> r
+{
+    "status": "200 OK", 
+    "code": "/api/status/ok", 
+    "result": {
+      "length": $length$, 
+      "blob_id": "115ccad525afbb09ed7b18ea06cacdbc60380ec03de69523ae01da5c371c72c8", 
+      "language": "/lang/en", 
+      "media_type": "application/pdf", 
+      "text_encoding": null, 
+      "type": "/type/content", 
+      "id": "/guid/4401a8c040003d1d8000000000027ef2"
+    }
+  }
+
 }}}
 Similar to `upload`, `uri_submit` takes the URI of the information you want to upload to freebase and uploads it. You can upload any type of document and can attach it to a real document with the use of the document_id property.
