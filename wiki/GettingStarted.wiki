@@ -123,7 +123,7 @@ Service APIs don't work any differently than the base APIs. There are five categ
 {{{
 >>> r = freebase.raw(id)
 }}}
-Given the id of a document, `raw` will return that blob exactly as it is. Note you cannot ask for the raw of a topic because it is not a document. First, you have to isolate what document you want and then you can get its content.
+Given the id of a document, `raw` will return that blob exactly as it is. Note that you cannot ask for the raw of a topic because it is not a document. First, you have to isolate what document you want and then you can get its content.
 {{{
 >>> query = {
         "id" : "/en/the_beatles",
