@@ -69,7 +69,7 @@ Black Sabbath
 Kings of Leon
 Aphex Twin
 ...
-
+}}}
 === mqlreadmulti ===
 {{{
 r = mqlreadmulti(queries, asof=None)
