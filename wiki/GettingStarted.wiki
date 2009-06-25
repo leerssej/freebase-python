@@ -45,8 +45,57 @@ A full list of the freebase apis is at the [http://www.freebase.com/view/freebas
 {{{
 >>> r = freebase.mqlread(query, asof=None)
 }}}
-`mqlread` is used to read information from freebase. The query must be written in MQL. For more information on MQL, refer to the [http://mql.freebaseapps.com/ MQL and Freebase API reference guide]. You can also test your queries on the [http://www.freebase.com/app/queryeditor/ Query Editor], which can provide additional information on the query if you're stuck.
+`mqlread` is used to read information from freebase. The query must be written in MQL. For more information on MQL, refer to the [http://mql.freebaseapps.com/ MQL and Freebase API reference guide]. You can also test your queries on the [http://www.freebase.com/app/queryeditor/ Query Editor], which can provide additional information on the query if you're stuck. `asof` is "as-of-time."
 
+=== mqlreaditer ===
+{{{
+>>> r = freebase.mqlreaditer(query, asof=None)
+}}}
+This is `mqlread`, but it returns a python generator with the results. This way, you can construct a query that would take too long on its own and just iterate through the results.
+{{{
+>>> r = freebase.mqlreaditer({"type":"/music/artist", "name":None})
+>>> r
+<generator object mqlreaditer at 0x......>
+>>> for i in r:
+...     print i["name"]
+...
+Blonde Redhead
+Bruce Cockburn
+Buck Owens
+Dwight Yoakam
+Led Zeppelin
+Yo La Tengo
+Black Sabbath
+Kings of Leon
+Aphex Twin
+...
+
+=== mqlreadmulti ===
+{{{
+r = mqlreadmulti(queries, asof=None)
+}}}
+`mqlreadmulti`, as the name suggests, is used to execute many queries.
+{{{
+>>> r = mqlreadmulti([
+      {"id":"/en/the_beatles", "name":None}, 
+      {"id":"/en/the_police", "name":None}
+    ])
+>>> for i in r:
+...     print i["name"]
+...
+The Beatles
+The Police
+}}}
+Granted, this example query could be written more succinctly like so:
+{{{
+>>> r = mqlread({"id|=" : ["/en/the_beatles", "/en/the_police"],
+                 "name" : None})
+>>> for i in r:
+...     print i["name"]
+The Beatles
+The Police
+}}}
+But that's missing the point. The point is that you can execute multiple queries of any sort with `mqlreadmulti`.
 === [http://www.freebase.com/view/en/api_service_mqlwrite mqlwrite] ===
 {{{
 >>> r = freebase.mqlwrite(query)
