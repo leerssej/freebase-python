@@ -41,6 +41,8 @@ This would be useful if you wanted to be able to easily switch between using san
 = The API =
 A full list of the freebase apis is at the [http://www.freebase.com/view/freebase/metaweb_api_service metaweb_api_service page]. Most of them are supported here.
 
+== mqlread / mqlwrite ==
+
 === [http://www.freebase.com/view/en/api_service_mqlread mqlread] ===
 {{{
 >>> r = freebase.mqlread(query, asof=None)
@@ -102,6 +104,8 @@ But that's missing the point. The point is that you can execute multiple queries
 }}}
 `mqlread`'s sister, `mqlwrite` writes to freebase. It's especially important to consult the [http://mql.freebaseapps.com/ reference guide], because writes are even more complicated than reads.
 
+== User Account ==
+
 === [http://www.freebase.com/view/en/api_account_login login] ===
 {{{
 >>> freebase.login(username=andrew, password=secret)
@@ -138,34 +142,8 @@ Returns a typical dictionary response with information on the user.
 User not logged in.
 }}}
 Returns a boolean indicating whether or not a user is logged in or not.
-=== [http://www.freebase.com/view/en/api_version version] ===
-{{{
->>> print freebase.version()
-{ u'me': u'me/dev/135/pyroot:76103', 
-  u'index': u'relevance/dev/27:74629', 
-  u'code': u'/api/status/ok', 
-  u'cdb': u'cdb/dev/18:72726', 
-  u'graph': u'gd/dev/50:76020', 
-  u'server': u'www.freebase.com', 
-  u'client': u'client/dev/93:76143', 
-  u'status': u'200 OK', 
-  u'transaction_id': u'cache;...' }
-}}}
-Not usually needed, but it returns the current version of each of freebase's major systems.
-=== [http://www.freebase.com/view/en/api_status status] ===
-{{{
->>> print freebase.status()
-{ u'status': u'200 OK',
-  u'code': u'/api/status/ok',
-  u'graph': u'OK',
-  u'blob': u'OK', 
-  u'relevance': u'OK',
-  u'transaction_id': u'cache;...' }
-}}}
-Hopefully there won't be a problem, but just in case you want to check, this is the current status of the freebase systems.
 
-= Service APIs =
-Service APIs don't work any differently than the base APIs. There are five categories: `trans`, `upload`, `search`, `geosearch`, and `touch`.
+== trans ==
 
 === [http://www.freebase.com/view/en/api_trans_raw trans raw] ===
 {{{
@@ -217,6 +195,8 @@ The major difference between `blurb` and `raw` is that `blurb` only returns text
 }}}
 `image_thumb` returns an image scaled around according to the arguments passed to it. The exact way the arguments are detailed is located [http://www.freebase.com/view/en/api_trans_image_thumb here].
 
+== Upload ==
+
 === [http://www.freebase.com/view/en/api_service_upload upload] ===
 {{{
 >>> r = freebase.sandbox.upload(body, content_type, document_id=False, permission_of=False)
@@ -253,3 +233,31 @@ Similar to `upload`, `uri_submit` takes the URI of the information you want to u
   u'type': u'/type/content',
   u'id': u'/guid/9202a8c04000641f800000000c6f1aa5' }
 }}}
+
+== Random, Static-ky Services on Freebase ==
+
+=== [http://www.freebase.com/view/en/api_version version] ===
+{{{
+>>> print freebase.version()
+{ u'me': u'me/dev/135/pyroot:76103', 
+  u'index': u'relevance/dev/27:74629', 
+  u'code': u'/api/status/ok', 
+  u'cdb': u'cdb/dev/18:72726', 
+  u'graph': u'gd/dev/50:76020', 
+  u'server': u'www.freebase.com', 
+  u'client': u'client/dev/93:76143', 
+  u'status': u'200 OK', 
+  u'transaction_id': u'cache;...' }
+}}}
+Not usually needed, but it returns the current version of each of freebase's major systems.
+=== [http://www.freebase.com/view/en/api_status status] ===
+{{{
+>>> print freebase.status()
+{ u'status': u'200 OK',
+  u'code': u'/api/status/ok',
+  u'graph': u'OK',
+  u'blob': u'OK', 
+  u'relevance': u'OK',
+  u'transaction_id': u'cache;...' }
+}}}
+Hopefully there won't be a problem, but just in case you want to check, this is the current status of the freebase systems.
