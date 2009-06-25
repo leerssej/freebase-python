@@ -260,4 +260,4 @@ Not usually needed, but it returns the current version of each of freebase's maj
   u'relevance': u'OK',
   u'transaction_id': u'cache;...' }
 }}}
-Hopefully there won't be a problem, but just in case you want to check, this is the current status of the freebase systems.
+Hopefully there won't be a problem, but just in case you want to check, this gives the current status of the freebase systems.
