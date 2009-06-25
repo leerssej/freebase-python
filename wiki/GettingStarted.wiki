@@ -88,8 +88,8 @@ The Police
 }}}
 Granted, this example query could be written more succinctly like so:
 {{{
->>> r = mqlread({"id|=" : ["/en/the_beatles", "/en/the_police"],
-                 "name" : None})
+>>> r = mqlread([{"id|=" : ["/en/the_beatles", "/en/the_police"],
+                 "name" : None}])
 >>> for i in r:
 ...     print i["name"]
 The Beatles
