@@ -163,7 +163,7 @@ This creates a private domain for you to use. It's not a base, but it's close.
 
 === [http://www.freebase.com/edit/topic/en/api_service_delete_private_domain delete_private_domain] ===
 {{{
->>> r = freebase.sandbox.create_private_domain(domain_key)
+>>> r = freebase.sandbox.delete_private_domain(domain_key)
 }}}
 This deletes an *empty* private domain.
 {{{
