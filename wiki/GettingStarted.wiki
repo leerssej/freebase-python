@@ -143,6 +143,40 @@ User not logged in.
 }}}
 Returns a boolean indicating whether or not a user is logged in or not.
 
+== Private Domains ==
+
+=== [http://www.freebase.com/edit/topic/en/api_service_create_private_domain create_private_domain] ===
+{{{
+>>> r = freebase.sandbox.create_private_domain(domain_key, display_name)
+}}}
+This creates a private domain for you to use. It's not a base, but it's close.
+{{{
+>>> freebase.sandbox.login(username="andrew", password="secret")
+>>> freebase.sandbox.create_private_domain("hello", "Hello, world!")
+{ u'status': u'200 OK',
+  u'domain_key': u'hello', 
+  u'code': u'/api/status/ok', 
+  u'domain_id': u'/guid/9202a8c04000641f800000000c8320c6', 
+  u'transaction_id': u'cache;...' }
+}}}
+
+
+=== [http://www.freebase.com/edit/topic/en/api_service_delete_private_domain delete_private_domain] ===
+{{{
+>>> r = freebase.sandbox.create_private_domain(domain_key)
+}}}
+This deletes an *empty* private domain.
+{{{
+>>> freebase.sandbox.login(username="andrew", password="secret")
+>>> freebase.sandbox.delete_private_domain("hello")
+{ u'status': u'200 OK',
+  u'code': u'/api/status/ok', 
+  u'domain_id': u'/user/nitromaster101/hello', 
+  u'domain_name': u'Hello, world!',
+  u'transaction_id': u'cache;...' }
+}}}
+
+
 == trans ==
 
 === [http://www.freebase.com/view/en/api_trans_raw trans raw] ===
