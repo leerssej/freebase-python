@@ -1,5 +1,5 @@
 #summary Make your base survive the sandbox refresh cycle
-#labels Recipe
+#labels Recipe,1.0
 
 = Problem =
 While Sandbox (sandbox.freebase.com) is an excellent place to test your ideas without messing up the real freebase database, it is refreshed every Monday. If your changes are just small tests in order to test freebase writing, this is no problem. But if you develop schemas in sandbox, this sucks. This recipe will show you how to make your types survive the sandbox refresh.
