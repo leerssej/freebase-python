@@ -1,4 +1,4 @@
-#summary : Forking types
+#summary Forking types
 #labels Recipe
 
 = Problem =
