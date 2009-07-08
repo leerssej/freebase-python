@@ -40,8 +40,8 @@ fh.write(jsondump)
 fh.close()
 }}}
 
-Now you can do all sorts of things: you could edit the `mytestbase.schema.json` file (it's pretty straightforward*), you could keep different versions of your schemas and see the changes over time, or you could share your file with others.
+Now you can do all sorts of things: you could edit the `mytestbase.schema.json` file (it's pretty straightforward\*), you could keep different versions of your schemas and see the changes over time, or you could share your file with others.
 
-* Please beware when editing the json file. It isn't `mql`. It resembles a mqlread result with a few special properties that aid it in reconstructing the schemas. While changing the uniqueness of a property is easy (true to false), adding entire new properties requires one to be sure of what they are doing. While drastically editing the output file isn't forbidden, please keep backup of the original dump.
+\* Please beware when editing the json file. It isn't `mql`. It resembles a mqlread result with a few special properties that aid it in reconstructing the schemas. While changing the uniqueness of a property is easy (true to false), adding entire new properties requires one to be sure of what they are doing. While drastically editing the output file isn't forbidden, please keep backup of the original dump.
 
 Do note, that although this recipe only covers saving a base from a sandbox refresh, you can do the same thing for types. The only difference is that you should use `dump_type` instead of `dump_base`. For more information, check out the ForkType page, which gives more information on copying types.
