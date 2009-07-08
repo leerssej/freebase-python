@@ -1,4 +1,4 @@
-#summary Forking types
+#summary Migrating your base from sandbox to production
 #labels Recipe
 
 = Problem =
