@@ -1,5 +1,5 @@
 #summary Forking types
-#labels Recipe
+#labels Recipe,1.0
 
 = Problem =
 You just found this base that has an intriguing schema on old cameras. You have a few ideas on how to improve it because you've just worked on a few schemas for DSLR cameras. The problem is that it looks like the base's owner has totally forgotten about freebase and his base. How can you improve his schemas without hand copying each and every one?
