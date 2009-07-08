@@ -11,6 +11,7 @@ In order to prevent all the schemas from being erased, we have to download a cop
 
 {{{
 import freebase, freebase.schema
+import json # or simplejson or jsonlib2
 
 # For schema manipulation, we can't use freebase.funcname syntax.
 # Instead, we have to make an HTTPMetawebSession
@@ -20,6 +21,11 @@ s.login("andrew", "secret")
 graph = freebase.schema.dump_base(s, "/base/mytestbase")
 
 # save the file!
+jsondump = json.dumps(graph, indent=2)
+fh = open("mytestbase.schema.json", "w")
+fh.write(jsondump)
+fh.close()
+
 # ... sandbox refresh ...
 # create an empty base in sandbox
 
@@ -27,18 +33,7 @@ graph = freebase.schema.dump_base(s, "/base/mytestbase")
 freebase.schema.restore(s, graph, "/base/mytestbase")
 }}}
 
-This example is very basic, but it shows the general idea of `dump_base` and `restore`. Of course, if you were actually using this to survive a schema refresh, you should save the graph. You could easily dump the contents in a file:
-{{{
-# ...
-import json # or simplejson or jsonlib2
-
-graph = freebase.schema.dump_base(s, "/base/mytestbase")
-jsondump = json.dumps(graph, indent=2)
-
-fh = open("mytestbase.schema.json", "w")
-fh.write(jsondump)
-fh.close()
-}}}
+This example is very basic, but it shows the general idea of `dump_base` and `restore`.
 
 Now you can do all sorts of things: you could edit the `mytestbase.schema.json` file (it's pretty straightforward{{{*}}}), you could keep different versions of your schemas and see the changes over time, or you could share your file with others.
 
