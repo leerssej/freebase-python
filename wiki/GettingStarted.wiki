@@ -59,7 +59,7 @@ This is `mqlread`, but it returns a python generator with the results. This way,
 >>> r
 <generator object mqlreaditer at 0x......>
 >>> for i in r:
-...     print i["name"]
+...     print i["name"] # if you have problems with outputting unicode, try, print i["name"].encode("<utf-8>")
 ...
 Blonde Redhead
 Bruce Cockburn
