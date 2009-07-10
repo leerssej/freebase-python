@@ -21,22 +21,22 @@ The goal of the our sample application is to make an image browser for freebase.
 Let's start with the id, 
 {{{
 [{
-    "id" : "/en/the_beatles"
+  "id" : "/en/the_beatles"
 }]
 }}}
 Good, we see it exists. Now it we get all the properties of The Beatles,
 {{{
 [{
-    "id" : "/en/the_beatles",
-    "*" : [{}]
+  "id" : "/en/the_beatles",
+  "*" : [{}]
 }]
 }}}
 If we look through every property, we don't see any images, or even image-related data. You can imagine that even if we did something like,
 {{{
 [{
 	"id": "/en/the_beatles",
-  	"type" : "/music/artist",
-  	"*":  [{}]
+  "type" : "/music/artist",
+  "*":  [{}]
 }]
 }}}
 Although we get more information about The Beatle's tracks and music labels, still no images.
@@ -48,7 +48,7 @@ It turns out that The Beatles are also typed /common/topic,
   "*":    null	
 }]
 }}}
-and voila! We see there are two images: The Beatles in Millings suits and The Beatles in 1964: John Lennon, Paul McCartneyBottom: George Harrison, Ringo Starr. Now we want more information about these images.
+and voila! We see there are two images: The Beatles in Millings suits and The Beatles in 1964: John Lennon, Paul McCartney, George Harrison, Ringo Starr. Now we want more information about these images.
 {{{
 [{
   "id":   "/en/the_beatles",
@@ -68,17 +68,16 @@ But actually, we really just want the ids.
 }}}
 So our result should look something like,
 {{{
-"code":          "/api/status/ok",
+"code": "/api/status/ok",
 "result": [{
-    "id":   "/en/the_beatles",
-    "image": [{
-        "id": "/wikipedia/images/en_id/851535"
-      },
-      {
-        "id": "/wikipedia/images/commons_id/4473823"
-      }
-    ],
-    "type": "/common/topic"
+  "id": "/en/the_beatles",
+  "image": [{
+    "id": "/wikipedia/images/en_id/851535"
+  },
+  {
+    "id": "/wikipedia/images/commons_id/4473823"
+  }],
+"type": "/common/topic"
 }],
 "status":        "200 OK",
 "transaction_id": "cache;..."
@@ -90,17 +89,17 @@ This is getting closer to our goal, but still not ideal. We want all the images 
 The naïve approach would be to iterate through all the properties of an object and get their images. Luckily, freebase provides a convenient way of querying everything that has to do with an object. It relies on `/type/reflect/any_master`, `/type/reflect/any_reverse`, and `/type/reflect/any_value`. `any_master` returns anything that the object points to, `any_reverse` is anything that points to the object, and `any_value` is any value related to the object. You can test the output of any of these properties in the query editor,
 {{{
 [{
-    "id": "/en/the_beatles",
+  "id": "/en/the_beatles",
 	"/type/reflect/any_master": [{}]
 }]
 }}}
 As we can see, there are a lot of things that /en/the_beatles point to. For one, a permission, that makes sense. Then a /common/document, which is the description. Third, /film/actor, because The Beatles were actors... This looks good, but we want images.
 {{{
 [{
-    "id": "/en/the_beatles",
-    "/type/reflect/any_master": [{
-	    "/common/topic/image": [{
-	        "id": null
+  "id": "/en/the_beatles",
+  "/type/reflect/any_master": [{
+	  "/common/topic/image": [{
+	    "id": null
     }]
   }]
 }]
