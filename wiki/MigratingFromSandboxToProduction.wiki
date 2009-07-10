@@ -1,5 +1,5 @@
 #summary Migrating your base from sandbox to production
-#labels Recipe,1.0
+#labels Recipe,1.0,Schema-Manipulation
 
 = Problem =
 After hours of toiling and perfecting your schema, you think it's downright snazzy. Hopefully, you've been working on your base in sandbox and [SandboxRefresh saving yourself from the sandbox refreshes]. Now you're ready to transfer the base into the "real" freebase production server so that anyone can use your cool schema and upload data.
