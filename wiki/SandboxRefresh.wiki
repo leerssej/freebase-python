@@ -45,5 +45,5 @@ Do note, that although this recipe only covers saving a base from a sandbox refr
 In order to make this tool useful, you can also use a command line wrapper.
 {{{
 fb_save_base /base/mytestbase > mytestbase.schema.json
-fb_restore /base/mytestbase < mytestbase.schema.json
+fb_restore /base/mytestbase mytestbase.schema.json
 }}}
