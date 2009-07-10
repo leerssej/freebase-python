@@ -51,4 +51,4 @@ You can also try a two-for-one deal:
 {{{
 fb_save_base -S /base/mytestbase | fb_restore --username andrew --password secret /base/myproductionbase -
 }}}
-This command gets a /base/mybase from sandbox and restores it into production. You have to specify your username and password to fb_restore in the command line because it can't read them from stdin (fb_save_base is putting in all this information from /base/mybase into sys.stdin).
+This command gets /base/mybase from sandbox and restores it into production. You have to specify your username and password to fb_restore in the command line because it can't read them from stdin (fb_save_base is putting in all this information from /base/mybase into sys.stdin).
