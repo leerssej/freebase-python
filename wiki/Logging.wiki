@@ -18,8 +18,24 @@ freebase.sandbox.log.addHandler(console)
 
 result = freebase.sandbox.mqlread([dict(name=None, type='/type/type')])
 }}}
-We create a `console` object that outputs to the console. It has a debug level (`logging.DEBUG`). We also set the logging level for the 
+We create a `console` object that outputs to the console. It has a debug level (`logging.DEBUG`). We also set the logging level for the logging object that inside the HTTPMetawebSession (discussed below). The logging level assigned to `freebase.sandbox` limits the library to only output at the level and higher. The logging level assigned to `console` sets what is printed (because this console prints to the screen). I could define another `StreamHandler` that had a different logging level, for, say, printing to a file.
+{{{
+import logging
+import freebase
 
+console = logging.StreamHandler()
+console.setLevel(logging.DEBUG)
+
+fileman = logging.FileHandler("freebase-python-problems.txt")
+fileman.setLevel(logging.ERROR)
+
+freebase.sandbox.log.setLevel(logging.DEBUG)
+freebase.sandbox.log.addHandler(console)
+freebase.sandbox.log.addHandler(fileman)
+
+result = freebase.sandbox.mqlread([dict(name=None, type='/type/type')])
+}}}
+We'll talk about logging to a file a bit later.
 == HTTPMetawebSession ==
 As you have hopefully found out, both `freebase` and `freebase.sandbox` are wrappers for separate `HTTPMetawebSession`s. This example is very similar to the one before, but exposes the underlying `HTTPMetawebSession`.
 {{{
@@ -36,8 +52,6 @@ mss.log.addHandler(console)
 
 result = mss.mqlread([dict(name=None, type='/type/type')])
 }}}
-
-The console object allows you to print to the screen. You want to set the same level of logging (DEBUG, INFO, WARNING, ERROR and CRITICAL) for the console object and mss.log because I think what ends up getting printed is the higher level.
 
 = Logging to a File =
 {{{
