@@ -49,4 +49,4 @@ andrew ~ $ fcl -S login nitromaster101
 freebase.com password: 
 andrew ~ $ fcl -S restore /base/mynewbase contractbridge-07-17-09.json 
 }}}
-The first command types the base `/base/contractbridge` into the contractbridge-07-17-09.json file. Next, we login to sandbox (specified by the `-S` flag). And finally, we restore our contractbridge-07-17-09.json file into a new base _on sandbox_, `/base/mynewbase`. Again, the `-S` flag specifies sandbox.
+The first command dumps the base `/base/contractbridge` into the contractbridge-07-17-09.json file. Next, we login to sandbox (specified by the `-S` flag). And finally, we restore our contractbridge-07-17-09.json file into a new base _on sandbox_, `/base/mynewbase`. Again, the `-S` flag specifies sandbox.
