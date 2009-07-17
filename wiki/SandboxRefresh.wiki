@@ -42,13 +42,11 @@ Now you can do all sorts of things: you could edit the `mytestbase.schema.json` 
 Do note, that although this recipe only covers saving a base from a sandbox refresh, you can do the same thing for types. The only difference is that you should use `dump_type` instead of `dump_base`. For more information, check out the ForkType page, which gives more information on copying types.
 
 = Solution (command line) =
-In order to make this tool useful, you can also use a command line wrapper.
+Even if you aren't as familiar with python, this tool can be accessed with a command line program, `fcl`, which is installed when you `easy_install freebase`.
 {{{
-fb_save_base /base/mytestbase > mytestbase.schema.json
-fb_restore /base/mytestbase mytestbase.schema.json
+andrew ~ $ fcl dump_base /base/contractbridge > contractbridge-07-17-09.json
+andrew ~ $ fcl -S login nitromaster101
+freebase.com password: 
+andrew ~ $ fcl -S restore /base/mynewbase contractbridge-07-17-09.json 
 }}}
-You can also try a two-for-one deal:
-{{{
-fb_save_base -S /base/mytestbase | fb_restore --username andrew --password secret /base/myproductionbase -
-}}}
-This command gets /base/mybase from sandbox and restores it into production. You have to specify your username and password to fb_restore in the command line because it can't read them from stdin (fb_save_base is putting in all this information from /base/mybase into sys.stdin).
+The first command types the base `/base/contractbridge` into the contractbridge-07-17-09.json file. Next, we login to sandbox (specified by the `-S` flag). And finally, we restore our contractbridge-07-17-09.json file into a new base _on sandbox_, `/base/mynewbase`. Again, the `-S` flag specifies sandbox.
