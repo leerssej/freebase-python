@@ -141,3 +141,5 @@ We have one more caveat. If there is an object that has an `any_master` or an `a
 And that, my friends, is the final query! Woah. All that work in order to get all the images related to a topic. But surprisingly, that's a lot of the work. The rest of the application will be getting information from this query and displaying it in a friendly fashion.
 
 = Step 3 =
+* to be added *
+The general idea, though, is to use the results of this query and generate a simple user interface to return images given a topic id.
