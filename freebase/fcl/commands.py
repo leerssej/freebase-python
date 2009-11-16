@@ -172,13 +172,13 @@ def cmd_ls(fb, path=None, long=False, timesort=False, revsort=False):
     #sys.stdout.write(' '.join([mk.value for mk in r['/type/namespace/keys']]))
 
     for mk in r['/type/namespace/keys']:
-        if long:
+        if (long):
             # trim off the /user/
             creator = re.sub('^/user/', '', mk.link.creator)
             timestamp = mk.link.timestamp
-            fb.out(mk.value, creator, timestamp)
+            out(mk.value, creator, timestamp)
         else:
-            fb.out(mk.value)
+            out(mk.value)
 
     if 0:
         suffix = ''
@@ -188,7 +188,7 @@ def cmd_ls(fb, path=None, long=False, timesort=False, revsort=False):
         print mk.value, mk.namespace.id+suffix
 
 
-@complete('path')
+
 def cmd_mkdir(fb, path):
     """create a new freebase namespace
     %prog mkdir id
@@ -213,7 +213,6 @@ def cmd_mkdir(fb, path):
 
     r = fb.mss.mqlwrite(wq)
 
-@complete('path', 'path')
 def cmd_ln(fb, src, dst):
     """create a namespace key
     %prog ln srcid dstid
@@ -249,7 +248,6 @@ def cmd_rm(fb, path):
 
     return disconnect_object(fb.mss, path)
 
-@complete('path', 'path')
 def cmd_mv(fb, src, dst):
     """rename srcid to dstid.
     %prog mv srcid dstid
@@ -261,13 +259,6 @@ def cmd_mv(fb, src, dst):
     cmd_ln(fb, src, dst)
     cmd_rm(fb, src)
 
-def cmd_cd(fb, path):
-    path = fb.absid(path)
-    fb.pwd = path
-
-def cmd_pwd(fb):
-    print fb.pwd
-
 def cmd_cat(fb, id, include_headers=False):
     """download a document from freebase to stdout
     %prog cat id
@@ -276,84 +267,6 @@ def cmd_cat(fb, id, include_headers=False):
     """
     return cmd_get(fb, id, localfile='-', include_headers=include_headers)
 
-def cmd_shell(fb):
-    import readline
-    import shlex
-    cache = {}
-    def complete_cmd(text, state):
-        def complete_path(t, i):
-            if t == '':
-                pwd = fb.pwd
-                k = 'value'
-                v = None
-            elif t.startswith('/'):
-                p = t.split('/')
-                k = 'value~='
-                v = '^'+p.pop()+'.*'
-                pwd = '/'.join(p)
-            else:
-                pwd = fb.pwd
-                k = 'value~='
-                v = '^'+t+'.*'
-
-            ckey = '%s:%s' % (k,v)
-            if ckey in cache:
-                r = cache[ckey]
-            else:
-                q = {'id': pwd,
-                     '/type/namespace/keys': [{k:v, 'value':None}]
-                     }
-                r = fb.mss.mqlread(q)
-                cache[ckey] = r
-
-            return r['/type/namespace/keys'][i]['value']
-
-        completes = {'path':complete_path}
-        lb = readline.get_line_buffer()
-        if lb == text:
-            m = [ c for c in fb.commands if c.startswith(text) ]
-            return m[state]
-        else:
-            args = lb.split()
-            cmd = args.pop(0)
-            la = len(args)-1
-            if la == -1:
-                la = 0
-
-            types = fb.commands[cmd].func.types
-            t = types[la]
-            return completes.get(t, lambda x,y: None)(text, state)
-
-
-    readline.set_completer(complete_cmd)
-    readline.parse_and_bind('tab: complete')
-    graphs = {
-        'http://trunk.qa.metaweb.com':'qa',
-        'http://branch.qa.metaweb.com':'qa',
-        'http://www.freebase.com':'otg',
-        'http://api.freebase.com':'otg',
-        'http://freebase.com':'otg',
-        'http://www.sandbox-freebase.com':'sandbox',
-        'http://api.sandbox-freebase.com':'sandbox',
-        'http://sandbox-freebase.com':'sandbox'
-    }
-
-    gname = graphs.get(fb.mss.service_url, 'unknown')
-    while True:
-        try:
-            line = raw_input((fb.mss.username+'@' if fb.mss.username else '') +gname+': '+fb.pwd+' > ')
-        except EOFError:
-            print
-            break
-
-        if line:
-            args = shlex.split(line)
-            cmd = args.pop(0)
-            if cmd in fb.commands:
-                fb.dispatch(fb.commands[cmd], args, {});
-            else:
-                print >>sys.stderr, "No such command: "+cmd
-        
 def cmd_get(fb, id, localfile=None, include_headers=False):
     """download a file from freebase
     %prog get id [localfile]
@@ -522,7 +435,7 @@ def cmd_dump(fb, id):
             else:
                 extra = ''
 
-            fb.out(k, id, name, type, extra)
+            out(k, id, name, type, extra)
                     
 
 def cmd_pget(fb, id, propid):
@@ -595,7 +508,6 @@ def cmd_touch(fb):
     fb.mss.mqlflush()
 
 
-@complete('path', 'path', None)
 def cmd_pset(fb, id, propkey, val, oldval=None, extra=None):
     """set a property of a freebase object  -- EXPERIMENTAL
     %prog pset object_id property_id value
@@ -730,7 +642,7 @@ def cmd_find(fb, qstr):
 
     results = fb.mss.mqlreaditer(q)
     for r in results:
-        fb.out(r.id)
+        out(r.id)
 
 
 def cmd_q(fb, qstr):
