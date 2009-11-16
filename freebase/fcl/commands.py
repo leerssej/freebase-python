@@ -28,17 +28,12 @@
 
 import os, sys, re, time
 from fbutil import *
-from cmdutil import *
 
-try:
-    import simplejson as json
-except ImportError:
-    import json
+import simplejson
 
 import freebase.rison as rison
 from freebase.api import attrdict
 
-from freebase.schema import connect_object, disconnect_object
 
 def cmd_help(fb, command=None):
     """get help on commands
@@ -128,41 +123,20 @@ def old_cmd_pwid(fb):
         print ''
 
 
-@option('long', '-l', default=False, action='store_true', help='show time and permission')
-@option('timesort', '-t', default=False, action='store_true', help='sort by time')
-@option('revsort', '-r', default=False, action='store_true', help='reverse sort order')
-def cmd_ls(fb, path=None, long=False, timesort=False, revsort=False):
+def cmd_ls(fb, path=None):
     """list the keys in a namespace
 
     %prog ls [id]
     """
     path = fb.absid(path)
-    # ignore trailing /
-    if len(path) > 1:
-        path = re.sub('/$', '', path)
-
-    kq = {
-        'value': None,
-        'namespace': {
-            'id': None
-        },
-        'sort': 'value',
-        'optional':True
-     }
-
-    if long or timesort:
-        kq['link'] = {
-            'timestamp': None,
-            'creator': None
-          }
-    if timesort:
-        kq['sort'] = 'link.timestamp'
-
-    if revsort:
-        kq['sort'] = '-' + kq['sort']
-
     q = {'id': path,
-         '/type/namespace/keys': [kq]
+         '/type/namespace/keys': [{'value': None,
+                                   'namespace': {
+                                       'id': None,
+                                       'type': []
+                                    },
+                                    'optional':True
+                                   }]
          }
 
     r = fb.mss.mqlread(q)
@@ -172,13 +146,7 @@ def cmd_ls(fb, path=None, long=False, timesort=False, revsort=False):
     #sys.stdout.write(' '.join([mk.value for mk in r['/type/namespace/keys']]))
 
     for mk in r['/type/namespace/keys']:
-        if long:
-            # trim off the /user/
-            creator = re.sub('^/user/', '', mk.link.creator)
-            timestamp = mk.link.timestamp
-            fb.out(mk.value, creator, timestamp)
-        else:
-            fb.out(mk.value)
+        print mk.value
 
     if 0:
         suffix = ''
@@ -188,7 +156,6 @@ def cmd_ls(fb, path=None, long=False, timesort=False, revsort=False):
         print mk.value, mk.namespace.id+suffix
 
 
-@complete('path')
 def cmd_mkdir(fb, path):
     """create a new freebase namespace
     %prog mkdir id
@@ -198,8 +165,6 @@ def cmd_mkdir(fb, path):
     a namespace.
     """
     path = fb.absid(path)
-    # ignore trailing /
-    path = re.sub('/$', '', path)
     dir,file = dirsplit(path)
     wq = { 'create': 'unless_exists',
            'key':{
@@ -213,7 +178,6 @@ def cmd_mkdir(fb, path):
 
     r = fb.mss.mqlwrite(wq)
 
-@complete('path', 'path')
 def cmd_ln(fb, src, dst):
     """create a namespace key
     %prog ln srcid dstid
@@ -223,12 +187,17 @@ def cmd_ln(fb, src, dst):
     """
     src = fb.absid(src)
     dst = fb.absid(dst)
-    
-    # ignore trailing /
-    src = re.sub('/$', '', src)
-    dst = re.sub('/$', '', dst)
+    dir,file = dirsplit(dst)
+    wq = { 'id': src,
+           'key':{
+               'connect': 'insert',
+               'namespace': dir,
+               'value': file
+               }
+         }
 
-    return connect_object(fb.mss, src, dst)
+    r = fb.mss.mqlwrite(wq)
+
 
 def cmd_rm(fb, path):
     """unlink a namespace key
@@ -244,12 +213,18 @@ def cmd_rm(fb, path):
     disturb anything other than the one directory entry.
     """
     path = fb.absid(path)
-    # ignore trailing /
-    path = re.sub('/$', '', path)
+    dir,file = dirsplit(path)
 
-    return disconnect_object(fb.mss, path)
+    wq = { 'id': path,
+           'key':{
+               'connect': 'delete',
+               'namespace': dir,
+               'value': file
+            }
+         }
 
-@complete('path', 'path')
+    r = fb.mss.mqlwrite(wq)
+
 def cmd_mv(fb, src, dst):
     """rename srcid to dstid.
     %prog mv srcid dstid
@@ -261,13 +236,6 @@ def cmd_mv(fb, src, dst):
     cmd_ln(fb, src, dst)
     cmd_rm(fb, src)
 
-def cmd_cd(fb, path):
-    path = fb.absid(path)
-    fb.pwd = path
-
-def cmd_pwd(fb):
-    print fb.pwd
-
 def cmd_cat(fb, id, include_headers=False):
     """download a document from freebase to stdout
     %prog cat id
@@ -276,84 +244,6 @@ def cmd_cat(fb, id, include_headers=False):
     """
     return cmd_get(fb, id, localfile='-', include_headers=include_headers)
 
-def cmd_shell(fb):
-    import readline
-    import shlex
-    cache = {}
-    def complete_cmd(text, state):
-        def complete_path(t, i):
-            if t == '':
-                pwd = fb.pwd
-                k = 'value'
-                v = None
-            elif t.startswith('/'):
-                p = t.split('/')
-                k = 'value~='
-                v = '^'+p.pop()+'.*'
-                pwd = '/'.join(p)
-            else:
-                pwd = fb.pwd
-                k = 'value~='
-                v = '^'+t+'.*'
-
-            ckey = '%s:%s' % (k,v)
-            if ckey in cache:
-                r = cache[ckey]
-            else:
-                q = {'id': pwd,
-                     '/type/namespace/keys': [{k:v, 'value':None}]
-                     }
-                r = fb.mss.mqlread(q)
-                cache[ckey] = r
-
-            return r['/type/namespace/keys'][i]['value']
-
-        completes = {'path':complete_path}
-        lb = readline.get_line_buffer()
-        if lb == text:
-            m = [ c for c in fb.commands if c.startswith(text) ]
-            return m[state]
-        else:
-            args = lb.split()
-            cmd = args.pop(0)
-            la = len(args)-1
-            if la == -1:
-                la = 0
-
-            types = fb.commands[cmd].func.types
-            t = types[la]
-            return completes.get(t, lambda x,y: None)(text, state)
-
-
-    readline.set_completer(complete_cmd)
-    readline.parse_and_bind('tab: complete')
-    graphs = {
-        'http://trunk.qa.metaweb.com':'qa',
-        'http://branch.qa.metaweb.com':'qa',
-        'http://www.freebase.com':'otg',
-        'http://api.freebase.com':'otg',
-        'http://freebase.com':'otg',
-        'http://www.sandbox-freebase.com':'sandbox',
-        'http://api.sandbox-freebase.com':'sandbox',
-        'http://sandbox-freebase.com':'sandbox'
-    }
-
-    gname = graphs.get(fb.mss.service_url, 'unknown')
-    while True:
-        try:
-            line = raw_input((fb.mss.username+'@' if fb.mss.username else '') +gname+': '+fb.pwd+' > ')
-        except EOFError:
-            print
-            break
-
-        if line:
-            args = shlex.split(line)
-            cmd = args.pop(0)
-            if cmd in fb.commands:
-                fb.dispatch(fb.commands[cmd], args, {});
-            else:
-                print >>sys.stderr, "No such command: "+cmd
-        
 def cmd_get(fb, id, localfile=None, include_headers=False):
     """download a file from freebase
     %prog get id [localfile]
@@ -379,9 +269,6 @@ def cmd_get(fb, id, localfile=None, include_headers=False):
                '/type/content/blob_id':None,
              }
         cd = fb.mss.mqlread(cq)
-        if cd is None:
-            raise CmdException('no match for id %r' % id)
-        
         if '/type/content' in cd.type:
             c.media_type = cd['/type/content/media_type'].name
             #c.text_encoding = cd['/type/content/text_encoding'].name
@@ -500,9 +387,9 @@ def cmd_dump(fb, id):
     """
     id = fb.absid(id)
 
-    import inspection
+    import inspect
 
-    r = inspection.inspect_object(fb.mss, id)
+    r = inspect.inspect_object(fb.mss, id)
     if r is None:
         raise CmdException('no match for id %r' % id)
 
@@ -522,7 +409,7 @@ def cmd_dump(fb, id):
             else:
                 extra = ''
 
-            fb.out(k, id, name, type, extra)
+            fb.trow(k, id, name, type, extra)
                     
 
 def cmd_pget(fb, id, propid):
@@ -595,7 +482,6 @@ def cmd_touch(fb):
     fb.mss.mqlflush()
 
 
-@complete('path', 'path', None)
 def cmd_pset(fb, id, propkey, val, oldval=None, extra=None):
     """set a property of a freebase object  -- EXPERIMENTAL
     %prog pset object_id property_id value
@@ -655,28 +541,21 @@ def cmd_pset(fb, id, propkey, val, oldval=None, extra=None):
         wq[propkey]['id'] = val
     elif prop.expected_type.id not in value_types:
         wq[propkey]['id'] = val
-    elif prop.expected_type.id == '/type/float':
-        wq[propkey]['value'] = float(val)
-    elif prop.expected_type.id == '/type/int':
-        wq[propkey]['value'] = int(val)
-    elif prop.expected_type.id == '/type/boolean':
-        wq[propkey]['value'] = bool(val)
-    elif prop.expected_type.id == '/type/text':
-        wq[propkey]['value'] = val
-        if extra is not None:
-            lang = extra
-        else:
-            lang = '/lang/en'
-        wq[propkey]['lang'] = lang
-    elif prop.expected_type.id == '/type/key':
-        wq[propkey]['value'] = val
-        if extra is not None:
-            wq[propkey]['namespace'] = extra
-        else:
-            raise CmdException('must specify a namespace to pset /type/key')
     else:
         wq[propkey]['value'] = val
-
+    
+        if prop.expected_type.id == '/type/text':
+            if extra is not None:
+                lang = extra
+            else:
+                lang = '/lang/en'
+            wq[propkey]['lang'] = lang
+    
+        if prop.expected_type.id == '/type/key':
+            if extra is not None:
+                wq[propkey]['namespace'] = extra
+            else:
+                raise CmdException('must specify a namespace to pset /type/key')
 
     r = fb.mss.mqlwrite(wq)
     print r[propkey]['connect']
@@ -730,8 +609,7 @@ def cmd_find(fb, qstr):
 
     results = fb.mss.mqlreaditer(q)
     for r in results:
-        fb.out(r.id)
-
+        print r.id
 
 def cmd_q(fb, qstr):
     """run a freebase query.
@@ -748,16 +626,9 @@ def cmd_q(fb, qstr):
     else:
         q = rison.loads('(' + qstr + ')')
 
-    # done this way for streaming
-    first = True
-    for result in fb.mss.mqlreaditer(q):
-        if first:
-            first = False
-            print '[',
-        else:
-            print ',',
-        print simplejson.dumps(result, indent=2),
-    print ']'
+    # results could be streamed with a little more work
+    results = fb.mss.mqlreaditer(q)
+    print simplejson.dumps(list(results), indent=2)
 
 def cmd_open(fb, id):
     """open a web browser on the given id.  works on OSX only for now.

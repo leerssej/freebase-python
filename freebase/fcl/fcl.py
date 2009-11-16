@@ -33,24 +33,19 @@ from optparse import OptionParser
 import getpass
 import cookielib
 import logging
-import inspect
+import simplejson
 
-try:
-    import simplejson as json
-except ImportError:
-    import json
 
-from cmdutil import CmdException, log, out
-from fbutil import FbException, default_propkeys
-
+from fbutil import FbException, CmdException, log, default_propkeys
 console = logging.StreamHandler()
 log.addHandler(console)
 
 from freebase.api import HTTPMetawebSession, MetawebError, attrdict
 
-_configdir = None
+_cookiedir = None
 if os.environ.has_key('HOME'):
-    _configdir = os.path.join(os.environ['HOME'], '.pyfreebase')
+    _cookiedir = os.path.join(os.environ['HOME'], '.pyfreebase')
+
 
 class Command(object):
     def __init__(self, module, name, func):
@@ -69,26 +64,22 @@ class Command(object):
             self.shortdoc = '(missing documentation)'
             self.doc = '(missing documentation)'
 
-        self.oparser = getattr(func, 'oparser', None)
 
 
-class FclCommandHandler(object):
+class FbCommandHandler(object):
 
     def __init__(self):
         self.service_host = 'www.freebase.com'
         self.cookiejar = None
-        self.pwd = '/'
+        self.cwid = ''
         self.progpath = 'fcl'
         self.commands = {}
-        self.out = out
 
         self.cookiefile = None
-        self.pwdfile = None
-        if _configdir is not None:
-            self.cookiefile = os.path.join(_configdir, 'cookiejar')
-            self.pwdfile = os.path.join(_configdir, 'pwd')
+        if _cookiedir is not None:
+            self.cookiefile = os.path.join(_cookiedir, 'cookiejar')
 
-        
+
     def init(self):
         if self.cookiefile is not None:
             self.cookiejar = cookielib.LWPCookieJar(self.cookiefile)
@@ -98,9 +89,7 @@ class FclCommandHandler(object):
                 except cookielib.LoadError:
                     log.warn('error loading cookies')
 
-        if self.pwdfile is not None:
-            if os.path.exists(self.pwdfile):
-                self.pwd = file(self.pwdfile).read()
+        #print 'start cookies %r' % self.cookiejar
 
         self.mss = HTTPMetawebSession(self.service_host,
                                       cookiejar=self.cookiejar)
@@ -109,37 +98,19 @@ class FclCommandHandler(object):
     def absid(self, path):
         if path is None:
             path = ''
-
         if path.startswith('/'):
             return path
 
-        if not isinstance(self.pwd, basestring) or not self.pwd.startswith('/'):
+        if not isinstance(self.cwid, basestring) or not self.cwid.startswith('/'):
             # svn cwid support is disabled because it relies on some svn glue that
             # was not sufficiently well thought out.
             # raise CmdException("can't resolve relative id %r without cwid - see 'fcl help pwid'" % (path))
             raise CmdException("no support for relative id %r" % (path))
 
-        if path == '':
-            return self.pwd
+        if path == '' or path == '.':
+            return self.cwid
 
-
-        if self.pwd == '/':
-            full = ['']
-        else:
-            full = self.pwd.split('/')
-
-        for a in path.split('/'):
-            if a == '.' or '':
-                continue
-            if a == '..':
-                full.pop()
-                continue
-
-            full.append(a)
-
-        path = '/'.join(full)
-
-        return path or '/'
+        return self.cwid + '/' + path
 
 
     def absprop(self, propkey):
@@ -167,24 +138,23 @@ class FclCommandHandler(object):
 
     def save(self):
         #print 'end cookies %r' % self.cookiejar
-        if _configdir and self.cookiefile.startswith(_configdir):
-            # create private _configdir if needed
-            if not os.path.exists(_configdir):
-                os.mkdir(_configdir, 0700)
-                os.chmod(_configdir, stat.S_IRWXU)
+        if _cookiedir and self.cookiefile.startswith(_cookiedir):
+            # create private cookiedir if needed
+            if not os.path.exists(_cookiedir):
+                os.mkdir(_cookiedir, 0700)
+                os.chmod(_cookiedir, stat.S_IRWXU)
 
         if self.cookiejar is None:
             return
 
         self.cookiejar.save(ignore_discard=True)
 
-        f = file(self.pwdfile, 'w')
-        f.write(self.pwd)
-        f.close()
+        # save the cwd and other state too
+
 
     def import_commands(self, modname):
         """
-        import new fcl commands from a file
+        import new fb commands from a file
         """
         namespace = {}
     
@@ -205,28 +175,23 @@ class FclCommandHandler(object):
         log.info('imported %r from %r' % (modname, mod.__file__))
 
 
-    def dispatch(self, cmd, args, kws):
-        try:
-            spec = inspect.getargspec(cmd.func)
-            required = len(spec.args) - len(spec.defaults or ())
-            if len(args) < (required-1):
-                sys.stderr.write("%s: arguments \"%s\" required\n" %
-                                 (cmd.func.__name__,
-                                 '\", \"'.join(spec.args[1:required])))
-                sys.exit(1)
-            cmd.func(self, *args, **kws)
+    def dispatch(self, cmd, args):
+        if cmd in self.commands:
+            try:
+                self.commands[cmd].func(self, *args)
+            except KeyboardInterrupt, e:
+                sys.stderr.write('%s\n' % (str(e),))
+            except FbException, e:
+                sys.stderr.write('%s\n' % (str(e),))
+            except CmdException, e:
+                sys.stderr.write('%s\n' % (str(e),))
+            except MetawebError, e:
+                sys.stderr.write('%s\n' % (str(e),))
+        else:
+            self.oparser.error('unknown subcommand %r, try "%s help"' % (cmd, self.progpath))
 
-            # flush the output
-            out.flush()
-        except KeyboardInterrupt, e:
-            sys.stderr.write('%s\n' % (str(e),))
-        except FbException, e:
-            sys.stderr.write('%s\n' % (str(e),))
-        except CmdException, e:
-            sys.stderr.write('%s\n' % (str(e),))
-        except MetawebError, e:
-            sys.stderr.write('%s\n' % (str(e),))
-       
+        self.save()
+        
 
     def cmdline_main(self):
         op = OptionParser(usage='%prog [options] command [args...] ')
@@ -253,7 +218,7 @@ class FclCommandHandler(object):
 
         op.add_option('-S', '--sandbox', dest='use_sandbox',
                         default=False, action='store_true',
-                        help='shortcut for --service=sandbox-freebase.com')
+                        help='shortcut for --service=sandbox.freebase.com')
 
         op.add_option('-c', '--cookiejar', dest='cookiefile',
                         metavar='FILE',
@@ -275,7 +240,7 @@ class FclCommandHandler(object):
         log.setLevel(loglevel)
 
         if options.use_sandbox:
-            self.service_host = 'sandbox-freebase.com'
+            self.service_host = 'sandbox.freebase.com'
         else:
             self.service_host = options.service_host
 
@@ -289,26 +254,9 @@ class FclCommandHandler(object):
 
         self.import_commands('freebase.fcl.commands')
         self.import_commands('freebase.fcl.mktype')
-        self.import_commands('freebase.fcl.schema')
 
-        subcmd = args.pop(0)
-
-        if subcmd in self.commands:
-            cmd = self.commands[subcmd]
-
-            if cmd.oparser is not None:
-                options,args = cmd.oparser.parse_args(args)
-                kws = options.__dict__
-            else:
-                kws = {}
-
-            self.dispatch(cmd, args, kws)
-        else:
-            self.oparser.error('unknown subcommand %r, try "%s help"' % (subcmd, self.progpath))
-
-        self.save()
-
-
+        cmd = args.pop(0)
+        self.dispatch(cmd, args)
 
 # entry point for script
 def main():
@@ -321,8 +269,8 @@ def main():
     except ImportError:
         pass
 
-    fcl = FclCommandHandler()
-    fcl.cmdline_main()
+    fb = FbCommandHandler()
+    fb.cmdline_main()
 
 if __name__ == '__main__':
     main()

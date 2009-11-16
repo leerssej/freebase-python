@@ -28,11 +28,16 @@
 
 
 import re
-import optparse
+
+import logging
+log = logging.getLogger()
+
 
 class FbException(Exception):
     pass
 
+class CmdException(Exception):
+    pass
 
 media_types = {
             'html': ['text/html'],

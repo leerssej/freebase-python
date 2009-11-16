@@ -11,7 +11,7 @@ from freebase.schema import dump_type, dump_base, restore
 
 USERNAME = 'username'
 PASSWORD = 'password'
-API_HOST = 'sandbox-freebase.com'
+API_HOST = 'sandbox.freebase.com'
 
 s = freebase.api.HTTPMetawebSession(API_HOST)
 
@@ -69,15 +69,9 @@ class TestHardcoreSchemaManipulation(unittest.TestCase):
         self.assertEqual([ignore_base(prop_id) for prop_id in realproperties], [ignore_base(prop_id) for prop_id in newproperties])
         
         # - check the properties and type's attributes are the same
-        # TODO
         
-    def test_restore_over_restore(self):
-        domain_id = _create_domain()
-        graph = dump_base(s, "/base/contractbridge")   
-        restore(s, graph, domain_id)
         
-        # now we restore again... it should raise a MetawebError
-        self.assertRaises(MetawebError, restore, s, graph, domain_id)
+        
     
     def test_try_copying_a_cvt(self):
         
