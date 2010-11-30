@@ -9,7 +9,7 @@ Instead of hand copying each one, we'll use one of the schema manipulation funct
 
 {{{
 import freebase, freebase.schema
-s = freebase.api.HTTPMetawebSession("http://sandbox.freebase.com")
+s = freebase.api.HTTPMetawebSession("http://api.sandbox.freebase.com")
 s.login("andrew", "secret")
 
 graph = freebase.schema.dump_type(s, "/base/oldcameras/camera", follow_types=False)
