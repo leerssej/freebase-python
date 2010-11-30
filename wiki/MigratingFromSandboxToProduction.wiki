@@ -9,10 +9,10 @@ This problem is actually almost identical to the SandboxRefresh. When we were su
 {{{
 import freebase, freebase.schema
 
-sandbox = freebase.api.HTTPMetawebSession("http://sandbox.freebase.com")
+sandbox = freebase.api.HTTPMetawebSession("http://api.sandbox.freebase.com")
 sandbox.login("andrew", "secret")
 
-production = freebase.api.HTTPMetawebSession("http://www.freebase.com")
+production = freebase.api.HTTPMetawebSession("http://api.freebase.com")
 sandbox.login("andrew", "secret")
 
 graph = freebase.schema.dump_base(sandbox, "/base/mybase")
