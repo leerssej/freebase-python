@@ -30,8 +30,8 @@ We could do the same for sandbox.freebase:
 For simplicity, you can call the class freebase and perform your operation. If you want to manage different connections with different settings, it is also possible to create HTTPMetawebSessions:
 {{{
 >>> from freebase import HTTPMetawebSession
->>> fms = HTTPMetawebSession("freebase.com")
->>> sms = HTTPMetawebSession("sandbox.freebase.com")
+>>> fms = HTTPMetawebSession("api.freebase.com")
+>>> sms = HTTPMetawebSession("api.sandbox.freebase.com")
 >>> result = fms.mqlread(query)
 >>> fms is not sms
 True
