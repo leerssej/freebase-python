@@ -205,7 +205,7 @@ You can actually do `raw` on any document content: an article, image, pdf, etc. 
 >>> image_id = r["/common/topic/image"]["id"]
 >>> im = freebase.raw(image_id) # Now you have the actual image.
 }}}
-The image's URL would be `www.freebase.com/api/trans/raw/{image_id}`.
+The image's URL would be `api.freebase.com/api/trans/raw/{image_id}`.
 
 === [http://www.freebase.com/view/en/api_trans_blurb trans blurb] ===
 {{{
@@ -257,7 +257,7 @@ The major difference between `blurb` and `raw` is that `blurb` only returns text
 }}}
 Similar to `upload`, `uri_submit` takes the URI of the information you want to upload to freebase and uploads it. You can upload any type of document and can attach it to a real document with the use of the document_id property.
 {{{
->>> r = freebase.sandbox.uri_submit("http://www.freebase.com")
+>>> r = freebase.sandbox.uri_submit("http://api.freebase.com")
 >>> r
 { u'/type/content/blob_id': u'1a287e9f3e87b65fd629c86feea0ccb71c6de563b70662f12d3f9d45a0b41e3d', 
   u'/type/content/language': u'/lang/en', 
