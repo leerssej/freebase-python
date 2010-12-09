@@ -21,7 +21,7 @@ Let's just make a simple read query for freebase:
 [u'Please Please Me', u'From Me to You', u'Introducing... The Beatles', u'She Lo...
 }}}
 
-We could do the same for sandbox.freebase:
+We could do the same for sandbox-freebase.com:
 {{{
 >>> import freebase.sandbox
 >>> result = freebase.sandbox.mqlread(query)
@@ -31,7 +31,7 @@ For simplicity, you can call the class freebase and perform your operation. If y
 {{{
 >>> from freebase import HTTPMetawebSession
 >>> fms = HTTPMetawebSession("api.freebase.com")
->>> sms = HTTPMetawebSession("api.sandbox.freebase.com")
+>>> sms = HTTPMetawebSession("api.sandbox-freebase.com")
 >>> result = fms.mqlread(query)
 >>> fms is not sms
 True
