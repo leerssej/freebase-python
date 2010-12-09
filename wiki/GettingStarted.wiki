@@ -36,7 +36,7 @@ For simplicity, you can call the class freebase and perform your operation. If y
 >>> fms is not sms
 True
 }}}
-This would be useful if you wanted to be able to easily switch between using sandbox.freebase.com and freebase.com or if you wanted to create many sessions to execute in parallel.
+This would be useful if you wanted to be able to easily switch between using sandbox-freebase.com and freebase.com or if you wanted to create many sessions to execute in parallel.
 
 = The API =
 A full list of the freebase apis is at the [http://www.freebase.com/view/freebase/metaweb_api_service metaweb_api_service page]. Most of them are supported here.
