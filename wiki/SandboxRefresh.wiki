@@ -2,7 +2,7 @@
 #labels Recipe,1.0,Schema-Manipulation
 
 = Problem =
-While Sandbox (sandbox.freebase.com) is an excellent place to test your ideas without messing up the real freebase database, it is refreshed every Monday. If your changes are just small tests in order to test freebase writing, this is no problem. But if you develop schemas in sandbox, this sucks. This recipe will show you how to make your types survive the sandbox refresh.
+While Sandbox (sandbox-freebase.com) is an excellent place to test your ideas without messing up the real freebase database, it is refreshed every Monday. If your changes are just small tests in order to test freebase writing, this is no problem. But if you develop schemas in sandbox, this sucks. This recipe will show you how to make your types survive the sandbox refresh.
 
 = Solution (python) =
 We will be using the latest version of freebase-python. We will be using some of the schema manipulation features which were introduced in version 1.0.
@@ -15,7 +15,7 @@ import json # or simplejson or jsonlib2
 
 # For schema manipulation, we can't use freebase.funcname syntax.
 # Instead, we have to make an HTTPMetawebSession
-s = freebase.api.HTTPMetawebSession("http://sandbox.freebase.com")
+s = freebase.api.HTTPMetawebSession("http://sandbox-freebase.com")
 s.login("andrew", "secret")
 
 graph = freebase.schema.dump_base(s, "/base/mytestbase")
