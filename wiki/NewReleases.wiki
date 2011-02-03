@@ -1,4 +1,4 @@
-#For Maintainers - Branching instructions (and updating pypi)
+=For Maintainers - Branching instructions (and updating pypi)=
 
 1.0.x branches are supported entirely by branches/1.0.x, trunk is a new line of development
 and should not be used to branch 1.0.x anything. 
