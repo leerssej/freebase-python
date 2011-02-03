@@ -43,7 +43,6 @@ __version__ = '1.0.4'
 
 import os, sys, re
 import cookielib
-import mimetools
 
 SEPARATORS = (",", ":")
 
@@ -175,17 +174,6 @@ except ImportError:
 def urlencode_weak(s):
     return urlquote(s, safe=',/:$')
 
-def makev(v):
-
-    if isinstance(v, bool):
-        v = unicode(v).lower()
-    elif isinstance(v, unicode):
-        v = v.encode('utf-8')
-    else:
-        v = str(v)
-
-    return urlencode_weak(v)
-
 
 # from http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/361668
 class attrdict(dict):
@@ -272,7 +260,7 @@ class HTTPMetawebSession(MetawebSession):
     #  see each other's writes immediately.
     _default_cookiejar = cookielib.CookieJar()
     
-    def __init__(self, service_url, username=None, password=None, prev_session=None, cookiejar=None, cookiefile=None, application_name=None, acre_service_url=None):
+    def __init__(self, service_url, username=None, password=None, prev_session=None, cookiejar=None, cookiefile=None, application_name=None):
         """
         create a new MetawebSession for interacting with the Metaweb.
         
@@ -288,14 +276,7 @@ class HTTPMetawebSession(MetawebSession):
             service_url = 'http://' + service_url
         
         self.service_url = service_url
-
-        if service_url[7:].startswith('www') or service_url[7:].startswith('api'):
-            self._base_url = service_url[11:]
-        else:
-            self._base_url  = service_url[7:]
-
-        self.acre_service_url = acre_service_url or "http://acre.%s" % self._base_url
-
+        
         self.username = username
         self.password = password
         
@@ -333,7 +314,7 @@ class HTTPMetawebSession(MetawebSession):
 
     
     def _httpreq(self, service_path, method='GET', body=None, form=None,
-                 headers=None, service='me'):
+                 headers=None):
         """
         make an http request to the service.
         
@@ -351,11 +332,8 @@ class HTTPMetawebSession(MetawebSession):
         if method != "GET" and method != "POST":
             assert 0, 'unknown method %s' % method
         
-        if service == 'me':
-            url = self.service_url + service_path
-        else:
-            url = self.acre_service_url + service_path
-
+        url = self.service_url + service_path
+        
         if headers is None:
             headers = {}
         else:
@@ -371,8 +349,8 @@ class HTTPMetawebSession(MetawebSession):
             assert ct is not None
         
         if form is not None:
-            qstr = '&'.join(['%s=%s' % (makev(k),
-                                        makev(v))
+            qstr = '&'.join(['%s=%s' % (urlencode_weak(unicode(k).encode('utf-8')),
+                                        urlencode_weak(unicode(v).encode('utf-8')))
                              for k,v in form.iteritems()])
             if method == 'POST':
                 # put the args on the url if we're putting something else
@@ -395,7 +373,7 @@ class HTTPMetawebSession(MetawebSession):
 
         
         # assure the service that this isn't a CSRF form submission
-        headers['x-requested-with'] = 'Freebase-Python'
+        headers['x-metaweb-request'] = 'Python'
         
         if 'user-agent' not in headers:
             user_agent = ["python", "freebase.api-%s" % __version__]
@@ -434,7 +412,7 @@ class HTTPMetawebSession(MetawebSession):
         if str(status) == '400' and is_jsbody:
             r = self._loadjson(body)
             msg = r.messages[0]
-            raise MetawebError(u'TID: %s %s %s %r' % (r.get('transaction_id', ''), msg.get('code',''), msg.message, msg.info))
+            raise MetawebError(u'%s %s %r' % (msg.get('code',''), msg.message, msg.info))
         
         raise MetawebError, 'request failed: %s: %s\n%s' % (url, status, body)
     
@@ -473,7 +451,7 @@ class HTTPMetawebSession(MetawebSession):
         if r.code != '/api/status/ok':
             for msg in r.messages:
                 self.log.error('mql error: %s %s %r' % (msg.code, msg.message, msg.get('query', None)))
-            raise MetawebError, 'query failed: %s %s\n%s\n%s' % (r.transaction_id, r.messages[0].code, r.messages[0].message, json.dumps(r.messages[0].get('query', None), indent=2))
+            raise MetawebError, 'query failed: %s\n%s\n%s' % (r.messages[0].code, r.messages[0].message, json.dumps(r.messages[0].get('query', None), indent=2))
     
     def _mqlresult(self, r):
         self._check_mqlerror(r)
@@ -486,7 +464,7 @@ class HTTPMetawebSession(MetawebSession):
     
     def login(self, username=None, password=None, rememberme=False):
         """sign in to the service. For a more complete description,
-        see http://www.freebase.com/docs/web_services/login"""
+        see http://www.freebase.com/view/en/api_account_login"""
         
         service = '/api/account/login'
         
@@ -501,8 +479,6 @@ class HTTPMetawebSession(MetawebSession):
         rememberme = rememberme and "true" or "false"
         form_params = {"username": username,
                        "password": password }
-        domain = self._base_url.split(":")[0]
-        form_params['domain'] = '%s' % domain
         if rememberme:
             form_params["rememberme"] = "true"
         r = self._httpreq_json(service, 'POST',
@@ -516,7 +492,7 @@ class HTTPMetawebSession(MetawebSession):
     
     def logout(self):
         """logout of the service. For a more complete description,
-        see http://www.freebase.com/docs/web_services/logout"""
+        see http://www.freebase.com/view/en/api_account_logout"""
         
         service = '/api/account/logout'
         
@@ -530,13 +506,11 @@ class HTTPMetawebSession(MetawebSession):
     @json_params
     def user_info(self, mql_output=None):
         """ get user_info. For a more complete description,
-        see http://www.freebase.com/docs/web_services/user_info"""
+        see http://www.freebase.com/view/guid/9202a8c04000641f800000000c36a842"""
         
         service = "/api/service/user_info"
-        form = {}
-        if mql_output is not None:
-            form['mql_output'] = mql_output
-        r = self._httpreq_json(service, 'POST', form=form)
+        
+        r = self._httpreq_json(service, 'POST', form=dict(mql_output=mql_output))
         return r
     
     def loggedin(self):
@@ -554,7 +528,7 @@ class HTTPMetawebSession(MetawebSession):
 
     def create_private_domain(self, domain_key, display_name):
         """ create a private domain. For a more complete description,
-        see http://www.freebase.com/docs/web_services/create_private_domain"""
+        see http://www.freebase.com/edit/topic/en/api_service_create_private_domain"""
         
         service = "/api/service/create_private_domain"
         
@@ -566,7 +540,7 @@ class HTTPMetawebSession(MetawebSession):
     
     def delete_private_domain(self, domain_key):
         """ create a private domain. For a more complete description,
-        see http://www.freebase.com/docs/web_services/delete_private_domain"""
+        see http://www.freebase.com/edit/topic/en/api_service_delete_private_domain"""
         
         service = "/api/service/delete_private_domain"
         
@@ -574,7 +548,7 @@ class HTTPMetawebSession(MetawebSession):
         
         return self._httpreq_json(service, 'POST', form=form)
     
-    def mqlreaditer(self, sq, asof=None, headers=None, escape=False, **envelope):
+    def mqlreaditer(self, sq, asof=None):
         """read a structure query."""
         
         cursor = True
@@ -586,14 +560,13 @@ class HTTPMetawebSession(MetawebSession):
             sq = sq[0]
         
         while 1:
-            subq = envelope.copy()
-            subq.update(query=[sq], cursor=cursor, escape=escape)
+            subq = dict(query=[sq], cursor=cursor, escape=False)
             if asof:
                 subq['as_of_time'] = asof
             
             qstr = json.dumps(subq, separators=SEPARATORS)
                         
-            r = self._httpreq_json(service, 'POST', form=dict(query=qstr), headers=headers)
+            r = self._httpreq_json(service, 'POST', form=dict(query=qstr))
             
             for item in self._mqlresult(r):
                 yield item
@@ -604,37 +577,33 @@ class HTTPMetawebSession(MetawebSession):
             else:
                 return
     
-    def mqlread(self, sq, asof=None, headers=None, escape=False, **envelope):
+    def mqlread(self, sq, asof=None):
         """read a structure query. For a more complete description,
-        see http://www.freebase.com/docs/web_services/mqlread"""
-        subq = envelope.copy()
-        subq.update(query=sq, escape=escape)
+        see http://www.freebase.com/view/en/api_service_mqlread"""
+        subq = dict(query=sq, escape=False)
         if asof:
             subq['as_of_time'] = asof
         
         if isinstance(sq, list):
             subq['cursor'] = True
-
         
         service = '/api/service/mqlread'
-
+        
         self.log.info('%s: %s',
                       service,
                       Delayed(logformat, sq))
         
         qstr = json.dumps(subq, separators=SEPARATORS)
-        r = self._httpreq_json(service, 'POST', form=dict(query=qstr), headers=headers)
+        r = self._httpreq_json(service, 'POST', form=dict(query=qstr))
         
         return self._mqlresult(r)
     
-    def mqlreadmulti(self, queries, asof=None, headers=None,
-                     escape=False, **envelope):
+    def mqlreadmulti(self, queries, asof=None):
         """read a structure query"""
         keys = [('q%d' % i) for i,v in enumerate(queries)];
         envelope = {}
         for i,sq in enumerate(queries):
-            subq = envelope.copy()
-            subq.update(query=sq, escape=escape)
+            subq = dict(query=sq, escape=False)
             if asof:
                 subq['as_of_time'] = asof
             
@@ -650,7 +619,7 @@ class HTTPMetawebSession(MetawebSession):
                       Delayed(logformat, envelope))
         
         qstr = json.dumps(envelope, separators=SEPARATORS)
-        rs = self._httpreq_json(service, 'POST', form=dict(queries=qstr), headers=headers)
+        rs = self._httpreq_json(service, 'POST', form=dict(queries=qstr))
         
         self.log.info('%s result: %s',
                       service,
@@ -660,12 +629,12 @@ class HTTPMetawebSession(MetawebSession):
     
     def trans(self, guid):
         """translate blob from id. Identical to `raw`. For more
-        information, see http://www.freebase.com/docs/web_services/trans_raw"""
+        information, see http://www.freebase.com/view/en/api_trans_raw"""
         return self.raw(guid)
     
     def raw(self, id):
         """translate blob from id. For a more complete description,
-        see http://www.freebase.com/docs/web_services/trans_raw"""
+        see http://www.freebase.com/view/en/api_trans_raw"""
         url = '/api/trans/raw' + urlquote(id)
         
         self.log.info(url)
@@ -678,7 +647,7 @@ class HTTPMetawebSession(MetawebSession):
     
     def blurb(self, id, break_paragraphs=False, maxlength=200):
         """translate only the text in blob from id. For a more
-        complete description, see http://www.freebase.com/docs/web_services/trans_blurb"""
+        complete description, see http://www.freebase.com/view/en/api_trans_blurb"""
         url = '/api/trans/blurb' + urlquote(id)
         
         self.log.info(url)
@@ -696,7 +665,7 @@ class HTTPMetawebSession(MetawebSession):
         
         self.log.info(url)
         
-        resp, body = self._httpreq(url, headers={'x-requested-with' : 'Freebase-Python'})
+        resp, body = self._httpreq(url, headers={'x-metaweb-request' : 'Python'})
         
         self.log.info('unsafe is %d bytes' % len(body))
         
@@ -705,7 +674,7 @@ class HTTPMetawebSession(MetawebSession):
     def image_thumb(self, id, maxwidth=None, maxheight=None, mode="fit", onfail=None):
         """ given the id of an image, this will return a URL of a thumbnail of the image.
         The full details of how the image is cropped and finessed is detailed at
-        http://www.freebase.com/docs/web_services/image_thumb"""
+        http://www.freebase.com/view/en/api_trans_image_thumb """
         
         service = "/api/trans/image_thumb"
         assert mode in ["fit", "fill", "fillcrop", "fillcropmid"]
@@ -723,12 +692,13 @@ class HTTPMetawebSession(MetawebSession):
         
         return body
     
-    def mqlwrite(self, sq, attribution_id=None, **envelope):
+    def mqlwrite(self, sq, use_permission_of=None, attribution_id=None):
         """do a mql write. For a more complete description,
-        see http://www.freebase.com/docs/web_services/mqlwrite"""
-        query = envelope.copy()
-        query.update(query=sq, escape=False)
-        if attribution_id:              # strange badly named api
+        see http://www.freebase.com/view/en/api_service_mqlwrite"""
+        query = dict(query=sq, escape=False)
+        if use_permission_of:
+            query['use_permission_of'] = use_permission_of
+        if attribution_id:
             query['attribution'] = attribution_id
 
         qstr = json.dumps(query, separators=SEPARATORS)
@@ -747,12 +717,11 @@ class HTTPMetawebSession(MetawebSession):
         self.log.debug('MQLWRITE RESP: %r', r)
         return self._mqlresult(r)
     
-    def mqlcheck(self, sq, escape=False, **envelope):
+    def mqlcheck(self, sq):
         """ See if a write is valid, and see what would happen, but do not
         actually do the write """
         
-        query = envelope.copy()
-        query.update(query=sq, escape=escape)
+        query = dict(query=sq, escape=False)
         qstr = json.dumps(query, separators=SEPARATORS)
         
         self.log.debug('MQLCHECK: %s', qstr)
@@ -783,13 +752,13 @@ class HTTPMetawebSession(MetawebSession):
     
     def touch(self):
         """ make sure you are accessing the most recent data. For a more
-        complete description, see http://www.freebase.com/docs/web_services/touch"""
+        complete description, see http://www.freebase.com/view/en/api_service_touch"""
         return self.mqlflush()
 
     
     def upload(self, body, content_type, document_id=False, permission_of=False):
         """upload to the metaweb. For a more complete description,
-        see http://www.freebase.com/docs/web_services/upload"""
+        see http://www.freebase.com/view/en/api_service_upload"""
         
         service = '/api/service/upload'
         
@@ -822,7 +791,7 @@ class HTTPMetawebSession(MetawebSession):
     
     def uri_submit(self, URI, document=None, content_type=None):
         """ submit a URI to freebase. For a more complete description,
-        see http://www.freebase.com/docs/web_services/uri_submit"""
+        see http://www.freebase.com/edit/topic/en/api_service_uri_submit """
         
         service = "/api/service/uri_submit"
         
@@ -837,20 +806,53 @@ class HTTPMetawebSession(MetawebSession):
         
 
     @json_params
-    def search(self, query, **kwargs):
+    def search(self, query, format=None, prefixed=None, limit=20, start=0,
+                type=None, type_strict="any", domain=None, domain_strict=None,
+                escape="html", timeout=None, mql_filter=None, mql_output=None):
         """ search freebase.com. For a more complete description,
-        see http://www.freebase.com/docs/web_services/search"""
+        see http://www.freebase.com/view/en/api_service_search"""
         
         service = "/api/service/search"
         
         form = dict(query=query)
-        form.update(kwargs)
         
-        return self._mqlresult(self._httpreq_json(service, 'POST', form=form))
+        if format:
+            form["format"] = format
+        if prefixed:
+            form["prefixed"] = prefixed
+        if limit:
+            form["limit"] = limit
+        if start:
+            form["start"] = start
+        if type:
+            form["type"] = type
+        if type_strict:
+            form["type_strict"] = type_strict
+        if domain:
+            form["domain"] = domain
+        if domain_strict:
+            form["domain_strict"] = domain_strict
+        if escape:
+            form["escape"] = escape
+        if timeout:
+            form["timeout"] = timeout
+        if mql_filter:
+            form["mql_filter"] = mql_filter
+        if mql_output:
+            form["mql_output"] = mql_output
+            
+        
+        r = self._httpreq_json(service, 'POST', form=form)
+        
+        return self._mqlresult(r)
         
 
     @json_params
-    def geosearch(self,format="json",**kwargs):
+    def geosearch(self, location=None, location_type=None,
+                  mql_input=None, limit=20, start=0, type=None,
+                  geometry_type=None, intersect=None, mql_filter=None,
+                  within=None, inside=None, order_by=None, count=None,
+                  format="json", mql_output=None):
         """ perform a geosearch. For a more complete description,
         see http://www.freebase.com/api/service/geosearch?help """
         
@@ -860,8 +862,38 @@ class HTTPMetawebSession(MetawebSession):
             raise Exception("You have to give it something to work with")
         
         form = dict()
-        form.update(kwargs)
-               
+        
+        if location:
+        	form["location"] = location
+        if location_type:
+        	form["location_type"] = location_type
+        if mql_input:
+        	form["mql_input"] = mql_input
+        if limit:
+        	form["limit"] = limit
+        if start:
+        	form["start"] = start
+        if type:
+        	form["type"] = type
+        if geometry_type:
+        	form["geometry_type"] = geometry_type
+        if intersect:
+        	form["intersect"] = intersect
+        if mql_filter:
+        	form["mql_filter"] = mql_filter
+        if within:
+        	form["within"] = within
+        if inside:
+        	form["inside"] = inside
+        if order_by:
+        	form["order_by"] = order_by
+        if count:
+        	form["count"] = count
+        if format:
+        	form["format"] = format
+        if mql_output:
+        	form["mql_output"] = mql_output
+        
         if format == "json":
             r = self._httpreq_json(service, 'POST', form=form)
         else:
@@ -871,16 +903,16 @@ class HTTPMetawebSession(MetawebSession):
     
     def version(self):
         """ get versions for various parts of freebase. For a more
-        complete description, see http://www.freebase.com/docs/web_services/version"""
+        complete description, see http://www.freebase.com/view/en/api_version"""
         
         service = "/api/version"
         r = self._httpreq_json(service)
         
         return r
-
+    
     def status(self):
        """ get the status for various parts of freebase. For a more
-       complete description, see http://www.freebase.com/docs/web_services/status"""
+       complete description, see http://www.freebase.com/view/en/api_status """
        
        service = "/api/status"
        r = self._httpreq_json(service)
@@ -903,308 +935,6 @@ class HTTPMetawebSession(MetawebSession):
         #self._mqlresult(r)
         return r
 
-    ### Acre Appeditor Services - for inspecting and manipulating Acre apps
-
-    ### Apps Specific Services
-    # OK
-    def list_user_apps(self, include_filenames=None):
-        service = '/appeditor/services/list_user_apps'
-
-        form = {}
-        if include_filenames is not None:
-            form['include_filenames'] = include_filenames
-
-        r = self._httpreq_json(service, 'GET', form=form, service='acre')
-        
-        return self._mqlresult(r)
-
-    # OK
-    def create_app(self, appid, name=None, clone=None, extra_group=None):
-        service = '/appeditor/services/create_app'
-        form = {'appid':appid}
-        if name:
-            form['name'] = name
-        if clone:
-            form['clone'] = clone
-        if extra_group:
-            form['extra_group'] = extra_group
-
-        r = self._httpreq_json(service, 'POST', form=form, service='acre')
-
-        return self._mqlresult(r)
-
-    # OK
-    def delete_app(self, appid):
-        service = '/appeditor/services/delete_app'
-        form = {'appid':appid}
-        r = self._httpreq_json(service, 'POST', form=form, service='acre')
-        return self._mqlresult(r)
-
-    ### App Specific Services
-
-    # OK
-    def get_app(self, appid):
-        service = '/appeditor/services/get_app'
-
-        form = {'appid':appid}
-
-        r = self._httpreq_json(service, 'GET', form=form, service='acre')
-        
-        return self._mqlresult(r)
-
-    # OK
-    def move_app(self, appid, to_appid):
-        service = '/appeditor/services/move_app'
-
-        form = {'appid':appid, 'to_appid':to_appid}
-
-        r = self._httpreq_json(service, 'POST', form=form, service='acre')
-        
-        return self._mqlresult(r)
-
-    def set_app_properties(self, appid, **properties):
-        service = '/appeditor/services/set_app_properties'
-        form = properties
-        form['appid'] = appid
-
-        r = self._httpreq_json(service, 'POST', form=form, service='acre')
-        return self._mqlresult(r)
-
-
-    # OK
-    def create_app_file(self, appid, name, acre_handler=None, based_on=None):
-        service = '/appeditor/services/create_app_file'
-        form = {'appid':appid, 'name':name}
-        if acre_handler:
-            form['acre_handler'] = acre_handler
-        if based_on:
-            form['based_on'] = based_on
-
-        r = self._httpreq_json(service, 'POST', form=form, service='acre')
-
-        return self._mqlresult(r)
-
-    # OK
-    def delete_app_file(self, appid, name):
-        service = '/appeditor/services/delete_app_file'
-
-        form = {'appid':appid, 'name':name}
-
-        r = self._httpreq_json(service, 'POST', form=form, service='acre')
-        
-        return self._mqlresult(r)
-
-    def delete_app_all_files(self, appid):
-        service = '/appeditor/services/delete_app_all_files'
-
-        form = {'appid':appid}
-
-        r = self._httpreq_json(service, 'POST', form=form, service='acre')
-
-        return self._mqlresult(r)
-
-    # OK
-    def get_app_history(self, appid, limit):
-        service = '/appeditor/services/get_app_history'
-
-        form = {'appid':appid, 'limit':limit}
-
-        r = self._httpreq_json(service, 'GET', form=form, service='acre')
-
-        return self._mqlresult(r)
-
-    # OK
-    def create_app_version(self, appid, version, timestamp=None, service_url=None):
-        service = '/appeditor/services/create_app_version'
-
-        form = {'appid':appid, 'version':version}
-        if timestamp:
-            form['timestamp'] = timestamp
-        if service_url:
-            form['service_url'] = service_url
-
-        r = self._httpreq_json(service, 'POST', form=form, service='acre')
-
-        return self._mqlresult(r)
-
-    # OK
-    def delete_app_version(self, appid, version):
-        service = '/appeditor/services/delete_app_version'
-        form = {'appid':appid, 'version':version}
-        r = self._httpreq_json(service, 'POST', form=form, service='acre')
-        return self._mqlresult(r)
-
-    # OK
-    def set_app_host(self, appid, host):
-        service = '/appeditor/services/set_app_host'
-        form = {'appid':appid, 'host':host}
-        r = self._httpreq_json(service, 'POST', form=form, service='acre')
-        return self._mqlresult(r)
-
-    # OK
-    def set_app_release(self, appid, version):
-        service = '/appeditor/services/set_app_release'
-        form = {'appid':appid, 'version':version}
-        r = self._httpreq_json(service, 'POST', form=form, service='acre')
-        return self._mqlresult(r)
-
-    # OK
-    def add_app_author(self, appid, username):
-        service = '/appeditor/services/add_app_author'
-        form = {'appid':appid, 'username':username}
-        r = self._httpreq_json(service, 'POST', form=form, service='acre')
-        return self._mqlresult(r)
-
-    # OK
-    def remove_app_author(self, appid, username):
-        service = '/appeditor/services/remove_app_author'
-        form = {'appid':appid, 'username':username}
-        r = self._httpreq_json(service, 'POST', form=form, service='acre')
-        return self._mqlresult(r)
-
-    # OK
-    def set_app_oauth_enabled(self, appid, enable=None):
-        service = '/appeditor/services/set_app_oauth_enabled'
-        form = {'appid':appid}
-        if enable is not None:
-            form['enable'] = enable
-        r = self._httpreq_json(service, 'POST', form=form, service='acre')
-        return self._mqlresult(r)
-
-    # OK
-    def set_app_writeuser(self, appid, enable=None):
-        service = '/appeditor/services/set_app_writeuser'
-        form = {'appid':appid}
-        if enable is not None:
-            form['enable'] = enable
-        r = self._httpreq_json(service, 'POST', form=form, service='acre')
-        return self._mqlresult(r)
-
-    ### App API keys
-
-    # OK
-    def list_app_apikeys(self, appid):
-        service = '/appeditor/services/list_app_apikeys'
-        form = {'appid':appid}
-        r = self._httpreq_json(service, 'POST', form=form, service='acre')
-        return self._mqlresult(r)
-
-    # OK
-    def create_app_apikey(self, appid, name, token, secret):
-        service = '/appeditor/services/create_app_apikey'
-        form = {'appid':appid, 'name':name, 'token':token, 'secret':secret}
-        r = self._httpreq_json(service, 'POST', form=form, service='acre')
-        return self._mqlresult(r)
-
-    # OK
-    def delete_app_apikey(self, appid, name):
-        service = '/appeditor/services/delete_app_apikey'
-        form = {'appid':appid, 'name':name}
-        r = self._httpreq_json(service, 'POST', form=form, service='acre')
-        return self._mqlresult(r)
-
-    ### File specific
-
-    # OK
-    def get_file(self, fileid):
-        service = '/appeditor/services/get_file'
-        form = {'fileid':fileid}
-        r = self._httpreq_json(service, 'GET', form=form, service='acre')
-        return self._mqlresult(r)
-
-    # OK 
-    def rename_file(self, fileid, name):
-        service = '/appeditor/services/rename_file'
-        form = {'fileid':fileid, 'name':name}
-        r = self._httpreq_json(service, 'POST', form=form, service='acre')
-        return self._mqlresult(r)
-
-    # OK
-    def save_text_file(self, fileid, text, acre_handler=None, content_type=None,
-                       revision=None, based_on=None):
-        service = '/appeditor/services/save_text_file'
-        form = {'fileid':fileid, 'text':text}
-        if acre_handler:
-            form['acre_handler'] = acre_handler
-        if content_type:
-            form['content_type'] = content_type
-        if revision:
-            form['revision'] = revision
-        if based_on:
-            form['based_on'] = based_on
-        r = self._httpreq_json(service, 'POST', form=form, service='acre')
-        return self._mqlresult(r)
-
-    # OK
-    def save_binary_file(self, fileid, f, content_type, revision=None, based_on=None):
-        def make_multipart_body(fn, f, ctype):
-            boundary = mimetools.choose_boundary()
-            parts = [
-                '--' + boundary, 
-                'Content-Disposition: form-data; name="file"; filename="%s"' % fn,
-                'Content-Type: %s' % ctype,
-                '', f.read(), '--' + boundary + '--', ''
-                ]
-            body = '\r\n'.join(parts)
-            return ('multipart/form-data; boundary=%s' % boundary, body)
-
-        service = '/appeditor/services/save_binary_file'
-        form = {'fileid':fileid}
-
-        ct, body = make_multipart_body(fileid.split('/')[-1], f, content_type)
-        form['acre_handler'] = 'binary'
-
-        if revision:
-            form['revision'] = revision
-        if based_on:
-            form['based_on'] = based_on
-        r = self._httpreq_json(service, 'POST', body=body, headers={'content-type':ct},
-                               form=form, service='acre')
-        return self._mqlresult(r)
-
-    # OK
-    def get_file_history(self, fileid, limit):
-        service = '/appeditor/services/get_file_history'
-        form = {'fileid':fileid, 'limit':limit}
-        r = self._httpreq_json(service, 'GET', form=form, service='acre')
-        return self._mqlresult(r)
-
-    # OK
-    def get_file_revision(self, fileid, revision):
-        service = '/appeditor/services/get_file_revision'
-        form = {'fileid':fileid, 'revision':revision}
-        r = self._httpreq_json(service, 'GET', form=form, service='acre')
-        return self._mqlresult(r)
-
-
-    # OK
-    def set_file_revision(self, fileid, revision):
-        service = '/appeditor/services/set_file_revision'
-        form = {'fileid':fileid, 'revision':revision}
-        r = self._httpreq_json(service, 'POST', form=form, service='acre')
-        return self._mqlresult(r)
-
-    # OK
-    def get_file_diff(self, revision1, revision2):
-        service ='/appeditor/services/get_file_diff'
-        form = {'revision1':revision1, 'revision2':revision2}
-        r = self._httpreq_json(service, 'GET', form=form, service='acre')
-        return self._mqlresult(r)
-
-    ### Store Services
-
-    # OK
-    def init_store(self):
-        service = '/appeditor/services/init_store'
-        r = self._httpreq_json(service, 'GET', service='acre')
-        return self._mqlresult(r)
-
-    # OK
-    def check_host_availability(self, host):
-        service = '/appeditor/services/check_host_availability'
-        form = {'host':host}
-        r = self._httpreq_json(service, 'GET', form=form, service='acre')
-        return self._mqlresult(r)
 
 if __name__ == '__main__':
     console = logging.StreamHandler()
